@@ -32,18 +32,6 @@ def generate_qpsk_signal(batch_size, num_symbols, ebno_db=None):
     return modulate_qpsk_signal(bits, ebno_db)
 
 
-def demodulate_qpsk_signal(sig, no=1e-4, soft=False):
-    x_matched = apply_matched_rrc_filter(sig, span_in_symbols, samples_per_symbol, beta)
-    num_symbols = sig.shape[-1] // samples_per_symbol
-    ds = sn.signal.Downsampling(samples_per_symbol, samples_per_symbol // 2, num_symbols)
-    x_hat = ds(x_matched)
-    x_hat /= tf.math.sqrt(tf.cast(samples_per_symbol, tf.complex64))
-    likelihood_ratios = demapper([x_hat, no])
-    if soft:
-        return likelihood_ratios, x_hat
-    return tf.cast(likelihood_ratios > 0, tf.float32), x_hat
-
-
 def modulate_qpsk_signal(msg_bits, ebno_db=None):
     x = mapper(msg_bits)
     us = sn.signal.Upsampling(samples_per_symbol)
@@ -58,3 +46,16 @@ def modulate_qpsk_signal(msg_bits, ebno_db=None):
         y = awgn_channel([x_matched, no])
     y = y * tf.math.sqrt(tf.cast(samples_per_symbol, tf.complex64))
     return y, x, msg_bits, constellation
+
+
+def demodulate_qpsk_signal(sig, no=1e-4, soft=False):
+    x_matched = apply_matched_rrc_filter(sig, span_in_symbols, samples_per_symbol, beta)
+    num_symbols = sig.shape[-1] // samples_per_symbol
+    ds = sn.signal.Downsampling(samples_per_symbol, samples_per_symbol // 2, num_symbols)
+    x_hat = ds(x_matched)
+    x_hat /= tf.math.sqrt(tf.cast(samples_per_symbol, tf.complex64))
+    likelihood_ratios = demapper([x_hat, no])
+    if soft:
+        return likelihood_ratios, x_hat
+    return tf.cast(likelihood_ratios > 0, tf.float32), x_hat
+
