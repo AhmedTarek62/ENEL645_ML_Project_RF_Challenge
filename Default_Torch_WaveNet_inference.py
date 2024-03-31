@@ -5,7 +5,8 @@ It also plots the MSE and BER curves
 """
 
 import torch
-from Default_Torch_WaveNet import Wave
+from src.Default_Torch_WaveNet import Wave
+from omegaconf import OmegaConf
 from dataset_utils.generate_train_mixture import generate_train_mixture
 from dataset_utils import SigSepDataset
 from eval_utils import postprocessing_helpers
@@ -18,13 +19,8 @@ def main(**kwargs):
     print(f"Using device: {device}")
 
     # load the model
-    model_params = {
-        "input_channels": 2,
-        "residual_layers": 30,
-        "residual_channels": 128,
-        "dilation_cycle_length": 10
-    }
-    model = Wave(**model_params).to(device)
+    cfg = OmegaConf.load("src/configs/wavenet.yaml")
+    model = Wave(cfg.model).to(device)
     model.load_state_dict(torch.load(kwargs['model_path'])["model"])
 
     print(
@@ -42,10 +38,12 @@ if __name__ == '__main__':
                         help='Number of batches to generate')
     parser.add_argument('--batch_size', type=int, default=200,
                         help='Batch size (number of examples per batch)')
+    parser.add_argument('--dataset', type=str, default='test',
+                        help='Dataset to generate (train/test)')
     parser.add_argument('--interference_dir_path', type=str,
-                        default="rf_datasets/train_set_unmixed/interference_set_frame/", help='Number of epochs to train the model')
+                        default="rf_datasets/train_test_set_unmixed/datasets/testset1_frame/", help='Number of epochs to train the model')
     args = parser.parse_args()
 
-    generate_train_mixture(args.soi_type, args.num_batches,
-                           args.batch_size, args.interference_dir_path)
+    # generate_train_mixture(args.soi_type, args.num_batches,
+    #                        args.batch_size, args.dataset, args.interference_dir_path)
     main(**vars(args))

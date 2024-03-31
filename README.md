@@ -19,8 +19,8 @@ python -m pip install -r requirments.txt
 Download interference files
 ```bash
 wget -O  dataset.zip "https://www.dropbox.com/scl/fi/zlvgxlhp8het8j8swchgg/dataset.zip?rlkey=4rrm2eyvjgi155ceg8gxb5fc4&dl=0"
-mkdir -p rf_datasets/train_set_unmixed
-unzip  dataset.zip -d rf_datasets/train_set_unmixed
+mkdir -p rf_datasets/train_test_set_unmixed
+unzip  dataset.zip -d rf_datasets/train_test_set_unmixed
 rm dataset.zip
 ```
 
@@ -33,7 +33,7 @@ unzip  reference_models.zip
 rm reference_models.zip
 
 # run inference model on QPSK signal and CommSignal2 interference
-python Default_Torch_WaveNet_inference.py --model_path=torchmodels/dataset_qpsk_commsignal2_mixture_wavenet/weights-206000.pt --soi_type=QPSK --num_batches=50 --batch_size=200 --interference_dir_path=rf_datasets/train_set_unmixed/dataset/interferenceset_frame
+python Default_Torch_WaveNet_inference.py --model_path=torchmodels/dataset_qpsk_commsignal2_mixture_wavenet/weights-206000.pt --soi_type=QPSK --num_batches=50 --batch_size=200 --interference_dir_path=rf_datasets/train_test_set_unmixed/dataset/testset1_frame
 ```
 
 ## Project Files

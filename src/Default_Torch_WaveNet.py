@@ -10,6 +10,8 @@ import torch.nn.functional as F
 
 from math import sqrt
 
+from .config_torchwavenet import ModelConfig
+
 
 Linear = nn.Linear
 ConvTranspose2d = nn.ConvTranspose2d
@@ -34,7 +36,7 @@ class ResidualBlock(nn.Module):
         '''
         super().__init__()
         self.dilated_conv = Conv1d(
-            residual_channels, 2 * residual_channels, 
+            residual_channels, 2 * residual_channels,
             3, padding=dilation, dilation=dilation)
 
         self.output_projection = Conv1d(
@@ -52,22 +54,21 @@ class ResidualBlock(nn.Module):
 
 
 class Wave(nn.Module):
-    def __init__(self,  input_channels=2, 
-                 residual_layers=30, residual_channels=128, 
-                 dilation_cycle_length=10):
+    def __init__(self, cfg: ModelConfig):
         super().__init__()
+        self.cfg = cfg
         self.input_projection = Conv1d(
-            input_channels, residual_channels, 1)
+            cfg.input_channels, cfg.residual_channels, 1)
 
         self.residual_layers = nn.ModuleList([
-            ResidualBlock(residual_channels, 2**(i %
-                          dilation_cycle_length))
-            for i in range(residual_layers)
+            ResidualBlock(cfg.residual_channels, 2**(i %
+                          cfg.dilation_cycle_length))
+            for i in range(cfg.residual_layers)
         ])
         self.skip_projection = Conv1d(
-            residual_channels, residual_channels, 1)
+            cfg.residual_channels, cfg.residual_channels, 1)
         self.output_projection = Conv1d(
-            residual_channels, input_channels, 1)
+            cfg.residual_channels, cfg.input_channels, 1)
         nn.init.zeros_(self.output_projection.weight)
 
     def forward(self, input):
