@@ -21,7 +21,7 @@ sig_len = 40_960
 intrf_files = ['CommSignal2', 'CommSignal3', 'CommSignal5G1', 'EMISignal1']
 
 
-def generate_train_mixture(soi_type, num_batches, batch_size, dataset="train", intrf_path_dir=Path('rf_datasets/train_set_unmixed/interference_set_frame/')):
+def generate_mixture(soi_type, num_batches, batch_size, dataset="train", intrf_path_dir=Path('rf_datasets/train_set_unmixed/interference_set_frame/')):
     # os.makedirs('rf_datasets/train_set_mixed', exist_ok=True)
     dataset_path = Path(
         f'rf_datasets/{dataset}_set_mixed/datasets/{soi_type}_{datetime.now().strftime("%Y%m%d_%H%M%S")}')
@@ -59,9 +59,9 @@ def generate_train_mixture(soi_type, num_batches, batch_size, dataset="train", i
                 tf.math.exp(1j * 2 * np.pi * phase_complex)
 
             sig_mixed_numpy = np.zeros(
-                (batch_size * len(intrf_frames), sig_len), dtype=complex)
+                (batch_size * len(intrf_frames), 2, sig_len), dtype=np.float32)
             sig_soi_numpy = np.zeros(
-                (batch_size * len(intrf_frames), sig_len), dtype=complex)
+                (batch_size * len(intrf_frames), 2, sig_len), dtype=np.float32)
             for i, frame in enumerate(intrf_frames):
                 sample_indices = np.random.randint(
                     frame.shape[0], size=(batch_size,))
@@ -76,9 +76,9 @@ def generate_train_mixture(soi_type, num_batches, batch_size, dataset="train", i
 
                 # save batch
                 sig_mixed_numpy[i * batch_size: (i + 1)
-                                * batch_size, :] = sig_mixed.numpy()
+                                * batch_size, :] = tf.stack([tf.math.real(sig_mixed), tf.math.imag(sig_mixed)], axis=-2).numpy()
                 sig_soi_numpy[i * batch_size: (i + 1)
-                              * batch_size, :] = sig_soi.numpy()
+                              * batch_size, :] = tf.stack([tf.math.real(sig_soi), tf.math.imag(sig_soi)], axis=-2).numpy()
                 del sig_mixed
             sinr_db_numpy = np.squeeze(
                 np.tile(sinr_db.numpy(), (len(intrf_frames), 1)))
@@ -88,3 +88,4 @@ def generate_train_mixture(soi_type, num_batches, batch_size, dataset="train", i
             dump(batch_data, os.path.join(dataset_path, mixture_filename))
 
     print(f'\nDataset saved at {dataset_path}')
+    return dataset_path

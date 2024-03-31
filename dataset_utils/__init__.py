@@ -1,2 +1,2 @@
-from .generate_train_mixture import generate_train_mixture
+from .generate_train_test_mixture import generate_mixture
 from .SigSepDataset import SigSepDataset
