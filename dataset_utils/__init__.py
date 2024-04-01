@@ -1,2 +1,3 @@
 from .generate_train_mixture import generate_train_mixture
+from .generate_competition_eval_mixture import generate_competition_eval_mixture
 from .SigSepDataset import SigSepDataset

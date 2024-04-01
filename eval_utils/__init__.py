@@ -1,0 +1,1 @@
+from .competition_eval_helpers import evaluate_competition
