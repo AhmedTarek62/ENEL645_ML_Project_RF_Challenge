@@ -64,7 +64,7 @@ def modulate_ofdm_signal(msg_bits, resource_grid, ebno_db=None):
     y = tf.squeeze(y, axis=[1, 2])
     x_rg = tf.squeeze(x_rg, axis=[1, 2])
     msg_bits = tf.squeeze(msg_bits, axis=[1, 2])
-    return y, x_rg, msg_bits, resource_grid
+    return y, msg_bits
 
 
 def generate_ofdm_signal(batch_size, num_ofdm_symbols, ebno_db=None):
@@ -86,4 +86,4 @@ def demodulate_ofdm_signal(sig, resource_grid, no=1e-4):
     x_demod = rg_demapper(tf.reshape(x_ofdm_demod, (sig.shape[0], 1, 1, -1, nfft)))
     likelihoods = demapper([x_demod, no])
     likelihoods = tf.squeeze(likelihoods, axis=[1, 2])
-    return tf.cast(likelihoods > 0, tf.float32), x_ofdm_demod
+    return tf.cast(likelihoods > 0, tf.float32).numpy(), x_ofdm_demod.numpy()

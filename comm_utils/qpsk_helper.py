@@ -45,7 +45,7 @@ def modulate_qpsk_signal(msg_bits, ebno_db=None):
         no = sn.utils.ebnodb2no(ebno_db=ebno_db, num_bits_per_symbol=bits_per_symbol, coderate=1.0)
         y = awgn_channel([x_matched, no])
     y = y * tf.math.sqrt(tf.cast(samples_per_symbol, tf.complex64))
-    return y, x, msg_bits, constellation
+    return y, msg_bits
 
 
 def demodulate_qpsk_signal(sig, no=1e-4, soft=False):
@@ -57,5 +57,5 @@ def demodulate_qpsk_signal(sig, no=1e-4, soft=False):
     likelihood_ratios = demapper([x_hat, no])
     if soft:
         return likelihood_ratios, x_hat
-    return tf.cast(likelihood_ratios > 0, tf.float32), x_hat
+    return tf.cast(likelihood_ratios > 0, tf.float32).numpy(), x_hat.numpy()
 

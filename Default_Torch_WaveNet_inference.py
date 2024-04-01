@@ -7,7 +7,7 @@ It also plots the MSE and BER curves
 import torch
 from src.Default_Torch_WaveNet import Wave
 from omegaconf import OmegaConf
-from dataset_utils.generate_train_test_mixture import generate_mixture
+from dataset_utils.generate_train_mixture import generate_mixture
 from dataset_utils import SigSepDataset
 from torch.utils.data import DataLoader
 from eval_utils import postprocessing_helpers
