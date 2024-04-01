@@ -6,7 +6,8 @@ import numpy as np
 
 class SigSepDataset(Dataset):
     def __init__(self, dataset_dir, dtype='real'):
-        self.filepaths_list = [os.path.join(dataset_dir, batch_file) for batch_file in os.listdir(dataset_dir)]
+        self.filepaths_list = [os.path.join(
+            dataset_dir, batch_file) for batch_file in os.listdir(dataset_dir)]
         self.samples_per_batch = load(self.filepaths_list[0])[0].shape[0]
         self.dtype = dtype
 
@@ -16,15 +17,16 @@ class SigSepDataset(Dataset):
         real_part = np.real(array)
         imag_part = np.imag(array)
 
-        # Concatenate real and imaginary parts along the second dimension
-        separated_array = np.concatenate((real_part, imag_part))
-
+        # stack real and imaginary parts to get a 2D array
+        separated_array = np.stack(
+            (real_part, imag_part), axis=-2, dtype=np.float32)
         return separated_array
 
     def __getitem__(self, index):
         file_index = index // self.samples_per_batch
         sample_index = index % self.samples_per_batch
-        sig_mixed, sig_target, msg_bits, intrf_labels, sinr_db = load(self.filepaths_list[file_index])
+        sig_mixed, sig_target, msg_bits, intrf_labels, sinr_db = load(
+            self.filepaths_list[file_index])
 
         if self.dtype == 'real':
             return (self.separate_real_imaginary(sig_mixed[sample_index]),
@@ -41,4 +43,3 @@ class SigSepDataset(Dataset):
 
     def __len__(self):
         return len(self.filepaths_list) * self.samples_per_batch
-

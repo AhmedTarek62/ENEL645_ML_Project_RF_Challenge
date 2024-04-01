@@ -1,0 +1,8 @@
+.hypothesis
+.idea
+__pycache__
+rf_datasets
+torchmodels
+*.pt
+*.pth
+*.pkl
