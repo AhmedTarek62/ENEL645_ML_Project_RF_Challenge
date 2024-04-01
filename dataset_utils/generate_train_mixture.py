@@ -45,7 +45,6 @@ def generate_train_mixture(soi_type, num_batches, batch_size, intrf_path_dir=Pat
     batch_size //= len(intrf_frames)
     intrf_labels = np.array([i for i in range(len(intrf_frames))
                             for _ in range(batch_size)])
-
     with tqdm(range(num_batches), desc='Data Generation', unit='batch') as pbar:
         for batch in pbar:
             sig_soi, msg_bits = gen_soi(batch_size, num_symbols)
@@ -91,6 +90,7 @@ def generate_train_mixture(soi_type, num_batches, batch_size, intrf_path_dir=Pat
                 np.tile(sinr_db.numpy(), (len(intrf_frames), 1)))
             batch_data = [sig_mixed_numpy, sig_soi_numpy,
                           msg_bits_numpy, intrf_labels, sinr_db_numpy]
+
             mixture_filename = f'{soi_type}_batch_{batch}'
             dump(batch_data, os.path.join(dataset_path, mixture_filename))
 
