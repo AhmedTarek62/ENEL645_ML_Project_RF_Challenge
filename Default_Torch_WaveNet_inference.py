@@ -7,16 +7,21 @@ It also plots the MSE and BER curves
 import torch
 from src.Default_Torch_WaveNet import Wave
 from omegaconf import OmegaConf
-from dataset_utils.generate_train_mixture import generate_train_mixture
+from dataset_utils.generate_train_test_mixture import generate_mixture
 from dataset_utils import SigSepDataset
+from torch.utils.data import DataLoader
 from eval_utils import postprocessing_helpers
-
+import numpy as np
+from tqdm import tqdm
 import argparse
+
+# constants
+intrf_files = ['CommSignal2', 'CommSignal3', 'CommSignal5G1', 'EMISignal1']
 
 
 def main(**kwargs):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"Using device: {device}")
+    print(f"\n\nUsing device: {device}")
 
     # load the model
     cfg = OmegaConf.load("src/configs/wavenet.yaml")
@@ -26,6 +31,60 @@ def main(**kwargs):
     print(
         f"The model has {sum(p.numel() for p in model.parameters())/1e6} million parameters")
 
+    # load the dataset
+    dataset = SigSepDataset(kwargs['dataset'], kwargs['batch_size'])
+    dataloader = DataLoader(
+        dataset, batch_size=kwargs['batch_size'], shuffle=False)
+    batch = next(iter(dataloader))
+    soi_mix, soi_target, intrf_labels, sinr_db = batch
+    # print(soi_mix.shape, soi_target.shape, intrf_labels.shape, sinr_db.shape)
+
+    model.eval()
+
+    sinr_all = []
+    soi_target_all = []
+    soi_no_mitigation_all = []
+    soi_est_all = []
+
+    with torch.no_grad():
+        for i, batch in tqdm(enumerate(dataloader), desc='Inference', total=kwargs['num_batches']):
+            soi_mix, soi_target, intrf_labels, sinr_db = batch
+            # only process for one interference type
+            idx = intrf_files.index(kwargs['interference_type'])
+            soi_mix, soi_target = soi_mix[intrf_labels == idx].to(
+                device), soi_target[intrf_labels == idx].to(device)
+            sinr_db = sinr_db[intrf_labels == idx]
+            soi_est = model(soi_mix)
+            soi_est_all.extend(soi_est.cpu().numpy())
+            soi_no_mitigation_all.extend(soi_mix.cpu().numpy())
+            soi_target_all.extend(soi_target.cpu().numpy())
+            sinr_all.extend(sinr_db.cpu().numpy())
+
+        soi_est_all = np.array(soi_est_all)
+        soi_no_mitigation_all = np.array(soi_no_mitigation_all)
+        soi_target_all = np.array(soi_target_all)
+        sinr_all = np.array(sinr_all)
+        # print(soi_est_all.shape, soi_no_mitigation_all.shape,
+        #       soi_target_all.shape, sinr_all.shape)
+
+        # combine IQ channels
+        soi_no_mitigation_all = soi_no_mitigation_all[:,
+                                                      0, :] + 1j * soi_no_mitigation_all[:, 1, :]
+        soi_target_all = soi_target_all[:, 0, :] + 1j * soi_target_all[:, 1, :]
+        soi_est_all = soi_est_all[:, 0, :] + 1j * soi_est_all[:, 1, :]
+
+        # postprocessing
+        if kwargs['soi_type'] == 'QPSK':
+            results = postprocessing_helpers.postprocess_qpsk(
+                soi_est_all, soi_no_mitigation_all, soi_target_all, sinr_all)
+        elif kwargs['soi_type'] == 'QPSK_OFDM':
+            results = postprocessing_helpers.postprocess_ofdm(
+                soi_est_all, soi_no_mitigation_all, soi_target_all, sinr_all)
+
+        # visualize the results
+        postprocessing_helpers.visualize_results(results, kwargs['soi_type'],
+                                                 kwargs['interference_type'], model_name="Default_Torch_WaveNet")
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -34,6 +93,8 @@ if __name__ == '__main__':
                         default='torchmodels/model.pth', help='Path to the trained model')
     parser.add_argument('--soi_type', type=str, default='QPSK',
                         help='Type of signal of interest (QPSK/QPSK_OFDM)')
+    parser.add_argument('--interference_type', type=str, default='CommSignal2',
+                        help='Type of interference signal (CommSignal2/CommSignal3/CommSignal5G1/EMISignal1)')
     parser.add_argument('--num_batches', type=int, default=50,
                         help='Number of batches to generate')
     parser.add_argument('--batch_size', type=int, default=200,
@@ -44,6 +105,8 @@ if __name__ == '__main__':
                         default="rf_datasets/train_test_set_unmixed/datasets/testset1_frame/", help='Number of epochs to train the model')
     args = parser.parse_args()
 
-    # generate_train_mixture(args.soi_type, args.num_batches,
-    #                        args.batch_size, args.dataset, args.interference_dir_path)
-    main(**vars(args))
+    dataset_path = generate_mixture(args.soi_type, args.num_batches,
+                                    args.batch_size, args.dataset, args.interference_dir_path)
+    args_dict = vars(args)
+    args_dict['dataset'] = dataset_path
+    main(**args_dict)

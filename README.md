@@ -33,7 +33,7 @@ unzip  reference_models.zip
 rm reference_models.zip
 
 # run inference model on QPSK signal and CommSignal2 interference
-python Default_Torch_WaveNet_inference.py --model_path=torchmodels/dataset_qpsk_commsignal2_mixture_wavenet/weights-206000.pt --soi_type=QPSK --num_batches=50 --batch_size=200 --interference_dir_path=rf_datasets/train_test_set_unmixed/dataset/testset1_frame
+python Default_Torch_WaveNet_inference.py --model_path=torchmodels/dataset_qpsk_commsignal2_mixture_wavenet/weights-206000.pt --soi_type=QPSK --num_batches=1000 --batch_size=4 --interference_dir_path=rf_datasets/train_test_set_unmixed/dataset/testset1_frame
 ```
 
 ## Project Files
