@@ -11,8 +11,8 @@ def train_epoch(model, dataloader, criterion, optimizer, device):
     with tqdm(dataloader, desc='Training', unit='batch') as pbar:
         for i, sample in enumerate(pbar):
             sig_mixed, sig_target = sample[0], sample[1]
-            sig_mixed = sig_mixed.to(device)
-            sig_target = sig_target.to(device)
+            sig_mixed = sig_mixed.view(-1, 1, sig_mixed.shape[-1]).float().to(device)
+            sig_target = sig_target.view(-1, 1, sig_target.shape[-1]).float().to(device)
             optimizer.zero_grad()
             sig_pred = model(sig_mixed)
             loss = criterion(sig_pred, sig_target)
