@@ -18,15 +18,13 @@ class SigSepDataset(Dataset):
         imag_part = np.imag(array)
 
         # stack real and imaginary parts to get a 2D array
-        separated_array = np.stack(
-            (real_part, imag_part), axis=-2, dtype=np.float32)
+        separated_array = np.stack((real_part, imag_part), axis=1).astype(np.float32)
         return separated_array
 
     def __getitem__(self, index):
         file_index = index // self.samples_per_batch
         sample_index = index % self.samples_per_batch
-        sig_mixed, sig_target, msg_bits, intrf_labels, sinr_db = load(
-            self.filepaths_list[file_index])
+        sig_mixed, sig_target, msg_bits, intrf_labels, sinr_db = load(self.filepaths_list[file_index])
 
         if self.dtype == 'real':
             return (self.separate_real_imaginary(sig_mixed[sample_index]),
