@@ -33,7 +33,7 @@ unzip  reference_models.zip
 rm reference_models.zip
 
 # run inference model on QPSK signal and CommSignal2 interference
-python Default_Torch_WaveNet_inference.py --model_path=torchmodels/dataset_qpsk_commsignal2_mixture_wavenet/weights-206000.pt --soi_type=QPSK --num_batches=1000 --batch_size=4 --interference_dir_path=rf_datasets/train_test_set_unmixed/dataset/testset1_frame
+python Default_Torch_WaveNet_inference.py --model_path=torchmodels/dataset_qpsk_commsignal2_mixture_wavenet/weights-206000.pt --soi_type=QPSK --batch_size=4 --interference_dir_path=rf_datasets/train_test_set_unmixed/dataset/testset1_frame
 ```
 
 ## Project Files
@@ -41,7 +41,6 @@ python Default_Torch_WaveNet_inference.py --model_path=torchmodels/dataset_qpsk_
 The project files are arranged as follows
 ```bash
 .
-|-- Default_Torch_WaveNet.py
 |-- Default_Torch_WaveNet_inference.py
 |-- README.md
 |-- comm_utils
@@ -57,18 +56,36 @@ The project files are arranged as follows
 |-- dataset_utils
 |   |-- SigSepDataset.py
 |   |-- __init__.py
-|   |-- generate_train_mixture.py
+|   |-- generate_competition_eval_mixture.py
+|   `-- generate_train_mixture.py
 |-- eval_utils
 |   |-- __init__.py
-|   |-- postprocessing_helpers.py
+|   |-- competition_eval_helpers.py
+|   `-- postprocessing_helpers.py
+|-- models
+|   |-- UNet.py
+|   |-- __init__.py
 |-- notebooks
+|   |-- RFC_Default_Torch_WaveNet_inference.ipynb
+|   `-- train_and_eval_basic_UNet.ipynb
 |-- requirements.txt
+|-- src
+|   |-- Default_Torch_WaveNet.py
+|   |-- __init__.py
+|   |-- config_torchwavenet.py
+|   `-- configs
+|       `-- wavenet.yaml
+`-- training_utils
+    |-- __init__.py
+    |-- train_helpers.py
+    `-- validation_helpers.py
 ```
 | Directory/File | Description |
 | --- | --- |
 | `comm_utils` | utils for digital communication techniques such as modulation, pulse shaping, demodulation and so on |
 | `data_manipulation_utils` | utils for ... |
 | `dataset_utils` | utils for generating and loading training datasets |
+| `training_utils` | utils for training a pytorch model |
 | `eval_utils` | utils for evaluating models |
-| `Default_Torch_WaveNet.py` | Baseline model design |
+| `src.Default_Torch_WaveNet.py` | Baseline model design |
 | `Default_Torch_WaveNet_inference.py` | a script to load baseline weights and perform inference on test dataset (Test1Mixture) |

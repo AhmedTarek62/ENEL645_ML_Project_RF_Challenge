@@ -22,9 +22,10 @@ def generate_competition_eval_mixture(soi_type, intrf_path_dir=Path('rf_datasets
     :param soi_type:
     :return:
     """
-    os.makedirs('datasets', exist_ok=True)
+
+    # os.makedirs('datasets', exist_ok=True)
     dataset_path = Path(
-        f'datasets/eval_{soi_type}_{datetime.now().strftime("%Y%m%d_%H%M%S")}')
+        f'rf_datasets/test_set_mixed/datasets/eval_{soi_type}_{datetime.now().strftime("%Y%m%d_%H%M%S")}')
     os.makedirs(dataset_path)
 
     if soi_type == 'QPSK':
@@ -40,7 +41,7 @@ def generate_competition_eval_mixture(soi_type, intrf_path_dir=Path('rf_datasets
 
     intrf_frames = list()
     for file in intrf_files:
-        with h5py.File(os.path.join(intrf_path_dir, file + '_raw_data.h5'), 'r') as data_h5file:
+        with h5py.File(os.path.join(intrf_path_dir, file + '_test1_raw_data.h5'), 'r') as data_h5file:
             intrf_frames.append(np.array(data_h5file.get('dataset')))
 
     all_sinr_db = np.arange(-30, 1, 3)
@@ -48,7 +49,7 @@ def generate_competition_eval_mixture(soi_type, intrf_path_dir=Path('rf_datasets
     num_intrf_signals = len(intrf_files)
     intrf_labels = np.array([i for i in range(len(intrf_frames))
                             for _ in range(num_test_cases)])
-
+    num_batches = len(all_sinr_db)
     for sinr_db in tqdm(all_sinr_db, desc='Generating Evaluation Data', unit='SINR Value'):
         sig_soi, msg_bits = gen_soi(num_test_cases, num_symbols)
         padding = [[0, 0], [0, sig_len - sig_soi.shape[1]]]
@@ -90,3 +91,6 @@ def generate_competition_eval_mixture(soi_type, intrf_path_dir=Path('rf_datasets
                       msg_bits_numpy, intrf_labels, sinr_db_numpy]
         mixture_filename = f'{soi_type}_sinr_{sinr_db}'
         dump(batch_data, os.path.join(dataset_path, mixture_filename))
+
+    print(f'\nDataset saved at {dataset_path}')
+    return dataset_path, num_batches, num_test_cases * num_intrf_signals

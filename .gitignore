@@ -3,4 +3,6 @@
 __pycache__
 rf_datasets
 torchmodels
-models
+*.pt
+*.pth
+*.pkl

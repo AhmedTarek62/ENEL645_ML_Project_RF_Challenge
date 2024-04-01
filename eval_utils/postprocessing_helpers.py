@@ -29,7 +29,7 @@ def get_smoothed(sinr: np.ndarray, ber, npoints=50):
     return bin_centers, bin_means
 
 
-def postprocess_qpsk(sig_est, sig_no_mitigation, sig_target, sinr_db):
+def postprocess_qpsk(sig_est, sig_no_mitigation, sig_target, msg_bits, sinr_db):
     """
     Post process the QPSK signals and calculate the MSE and BER
     """
@@ -39,14 +39,13 @@ def postprocess_qpsk(sig_est, sig_no_mitigation, sig_target, sinr_db):
     mse_est = get_db(np.mean(np.abs(sig_est - sig_target)**2, axis=-1))
 
     # calculate the bit error rate
-    bit_demod, _ = qpsk_helper.demodulate_qpsk_signal(sig_target)
     bit_no_mitigation, _ = qpsk_helper.demodulate_qpsk_signal(
         sig_no_mitigation)
     bit_est, _ = qpsk_helper.demodulate_qpsk_signal(sig_est)
 
     ber_no_mitigation = np.mean(
-        bit_no_mitigation != bit_demod, axis=-1).astype(np.float32)
-    ber_est = np.mean(bit_est != bit_demod, axis=-1).astype(np.float32)
+        bit_no_mitigation != msg_bits, axis=-1).astype(np.float32)
+    ber_est = np.mean(bit_est != msg_bits, axis=-1).astype(np.float32)
 
     return {
         "mse_no_mitigation": mse_no_mitigation,
@@ -57,7 +56,7 @@ def postprocess_qpsk(sig_est, sig_no_mitigation, sig_target, sinr_db):
     }
 
 
-def postprocess_ofdm(sig_est, sig_no_mitigation, sig_target, sinr_db):
+def postprocess_ofdm(sig_est, sig_no_mitigation, sig_target, msg_bits, sinr_db):
     """
     Post process the OFDM signals and calculate the MSE and BER
     """
@@ -67,14 +66,13 @@ def postprocess_ofdm(sig_est, sig_no_mitigation, sig_target, sinr_db):
     mse_est = get_db(np.mean(np.abs(sig_est - sig_target)**2, axis=-1))
 
     # calculate the bit error rate
-    bit_demod, _ = ofdm_helper.demodulate_ofdm_signal(sig_target)
     bit_no_mitigation, _ = ofdm_helper.demodulate_ofdm_signal(
         sig_no_mitigation)
     bit_est, _ = ofdm_helper.demodulate_ofdm_signal(sig_est)
 
     ber_no_mitigation = np.mean(
-        bit_no_mitigation != bit_demod, axis=-1).astype(np.float32)
-    ber_est = np.mean(bit_est != bit_demod, axis=-1).astype(np.float32)
+        bit_no_mitigation != msg_bits, axis=-1).astype(np.float32)
+    ber_est = np.mean(bit_est != msg_bits, axis=-1).astype(np.float32)
 
     return {
         "mse_no_mitigation": mse_no_mitigation,
@@ -85,7 +83,7 @@ def postprocess_ofdm(sig_est, sig_no_mitigation, sig_target, sinr_db):
     }
 
 
-def visualize_results(results, soi_type, interference_type, model_name="Default_Torch_WaveNet"):
+def visualize_results(results, soi_type, interference_type, model_name="Default_Torch_WaveNet", smoothen=True):
     """
     Visualize the results
     """
@@ -95,11 +93,25 @@ def visualize_results(results, soi_type, interference_type, model_name="Default_
     ber_no_mitigation = results["ber_no_mitigation"]
     ber_est = results["ber_est"]
 
+    if smoothen:
+        sinr_all, mse_no_mitigation = get_smoothed(
+            sinr_all, mse_no_mitigation, 11)
+        sinr_all, mse_est = get_smoothed(sinr_all, mse_est, 11)
+        sinr_all, ber_no_mitigation = get_smoothed(
+            sinr_all, ber_no_mitigation, 11)
+        sinr_all, ber_est = get_smoothed(sinr_all, ber_est, 11)
+    else:
+        sinr_all, mse_no_mitigation = zip(
+            *sorted(dict(zip(sinr_all, mse_no_mitigation)).items()))
+        sinr_all, mse_est = zip(*sorted(dict(zip(sinr_all, mse_est)).items()))
+        sinr_all, ber_no_mitigation = zip(
+            *sorted(dict(zip(sinr_all, ber_no_mitigation)).items()))
+        sinr_all, ber_est = zip(*sorted(dict(zip(sinr_all, ber_est)).items()))
+
     fig, axes = plt.subplots(2, 1, figsize=(6, 10))
-    axes[0].plot(*get_smoothed(sinr_all, mse_no_mitigation,
-                 11), "x--", label="Default_NoMitigation")
-    axes[0].plot(*get_smoothed(sinr_all, mse_est, 11),
-                 "x--", label=model_name)
+    axes[0].plot(sinr_all, mse_no_mitigation, "x--",
+                 label="Default_NoMitigation")
+    axes[0].plot(sinr_all, mse_est, "x--", label=model_name)
     axes[0].grid()
     axes[0].legend()
     axes[0].set_title(f"MSE - {soi_type} + {interference_type}")
@@ -107,9 +119,9 @@ def visualize_results(results, soi_type, interference_type, model_name="Default_
     axes[0].set_ylabel("MSE")
 
     axes[1].semilogy(
-        *get_smoothed(sinr_all, ber_no_mitigation, 11), "x--", label="Default_NoMitigation")
+        sinr_all, ber_no_mitigation, "x--", label="Default_NoMitigation")
     axes[1].semilogy(
-        *get_smoothed(sinr_all, ber_est, 11), "x--", label=model_name)
+        sinr_all, ber_est, "x--", label=model_name)
 
     axes[1].grid()
     axes[1].legend()
