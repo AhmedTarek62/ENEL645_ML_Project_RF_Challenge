@@ -9,6 +9,12 @@ from datetime import datetime
 from joblib import dump
 
 
+def get_db(p): return 10*np.log10(p)
+def get_pow(s): return np.mean(np.abs(s)**2, axis=-1)
+def get_sinr(s, i): return get_pow(s)/get_pow(i)
+def get_sinr_db(s, i): return get_db(get_sinr(s, i))
+
+
 samples_per_symbol = 16
 ofdm_symbol_len = 80  # Cyclic Prefix (16) + Subcarriers (64)
 sig_len = 40_960
@@ -66,6 +72,7 @@ def generate_competition_eval_mixture(soi_type, intrf_path_dir=Path('rf_datasets
             (num_test_cases * num_intrf_signals, sig_len), dtype=complex)
         msg_bits_numpy = np.zeros(
             (num_test_cases * num_intrf_signals, bits_per_stream))
+        sinr_db_numpy = np.zeros(num_test_cases * num_intrf_signals)
         for i, frame in enumerate(intrf_frames):
             sample_indices = np.random.randint(
                 frame.shape[0], size=(num_test_cases,))
@@ -83,10 +90,11 @@ def generate_competition_eval_mixture(soi_type, intrf_path_dir=Path('rf_datasets
                           * num_test_cases, :] = sig_soi.numpy()
             msg_bits_numpy[i * num_test_cases: (i + 1)
                            * num_test_cases, :] = msg_bits.numpy()
+            # save SINR case
+            sinr_db_numpy[i * num_test_cases: (i + 1) *
+                          num_test_cases] = get_sinr_db(sig_soi.numpy(), intrf_frame_snapshot.numpy() * gain_phasor.numpy())
             del sig_mixed
 
-        # save SINR case
-        sinr_db_numpy = sinr_db * np.ones((num_test_cases * num_intrf_signals))
         batch_data = [sig_mixed_numpy, sig_soi_numpy,
                       msg_bits_numpy, intrf_labels, sinr_db_numpy]
         mixture_filename = f'{soi_type}_sinr_{sinr_db}'

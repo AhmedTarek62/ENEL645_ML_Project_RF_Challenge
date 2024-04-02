@@ -94,24 +94,24 @@ def visualize_results(results, soi_type, interference_type, model_name="Default_
     ber_est = results["ber_est"]
 
     if smoothen:
-        sinr_all, mse_no_mitigation = get_smoothed(
+        sinr_db, mse_no_mitigation = get_smoothed(
             sinr_all, mse_no_mitigation, 11)
-        sinr_all, mse_est = get_smoothed(sinr_all, mse_est, 11)
-        sinr_all, ber_no_mitigation = get_smoothed(
+        sinr_db, mse_est = get_smoothed(sinr_all, mse_est, 11)
+        sinr_db, ber_no_mitigation = get_smoothed(
             sinr_all, ber_no_mitigation, 11)
-        sinr_all, ber_est = get_smoothed(sinr_all, ber_est, 11)
+        sinr_db, ber_est = get_smoothed(sinr_all, ber_est, 11)
     else:
-        sinr_all, mse_no_mitigation = zip(
+        sinr_db, mse_no_mitigation = zip(
             *sorted(dict(zip(sinr_all, mse_no_mitigation)).items()))
-        sinr_all, mse_est = zip(*sorted(dict(zip(sinr_all, mse_est)).items()))
-        sinr_all, ber_no_mitigation = zip(
+        sinr_db, mse_est = zip(*sorted(dict(zip(sinr_all, mse_est)).items()))
+        sinr_db, ber_no_mitigation = zip(
             *sorted(dict(zip(sinr_all, ber_no_mitigation)).items()))
-        sinr_all, ber_est = zip(*sorted(dict(zip(sinr_all, ber_est)).items()))
+        sinr_db, ber_est = zip(*sorted(dict(zip(sinr_all, ber_est)).items()))
 
     fig, axes = plt.subplots(2, 1, figsize=(6, 10))
-    axes[0].plot(sinr_all, mse_no_mitigation, "x--",
+    axes[0].plot(sinr_db, mse_no_mitigation, "x--",
                  label="Default_NoMitigation")
-    axes[0].plot(sinr_all, mse_est, "x--", label=model_name)
+    axes[0].plot(sinr_db, mse_est, "x--", label=model_name)
     axes[0].grid()
     axes[0].legend()
     axes[0].set_title(f"MSE - {soi_type} + {interference_type}")
@@ -119,9 +119,9 @@ def visualize_results(results, soi_type, interference_type, model_name="Default_
     axes[0].set_ylabel("MSE")
 
     axes[1].semilogy(
-        sinr_all, ber_no_mitigation, "x--", label="Default_NoMitigation")
+        sinr_db, ber_no_mitigation, "x--", label="Default_NoMitigation")
     axes[1].semilogy(
-        sinr_all, ber_est, "x--", label=model_name)
+        sinr_db, ber_est, "x--", label=model_name)
 
     axes[1].grid()
     axes[1].legend()

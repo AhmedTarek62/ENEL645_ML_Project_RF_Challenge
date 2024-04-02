@@ -89,7 +89,7 @@ def main(**kwargs):
 
         # visualize the results
         postprocessing_helpers.visualize_results(results, kwargs['soi_type'],
-                                                 kwargs['interference_type'], model_name="Default_Torch_WaveNet", smoothen=False)
+                                                 kwargs['interference_type'], model_name="Default_Torch_WaveNet")
 
 
 if __name__ == '__main__':
