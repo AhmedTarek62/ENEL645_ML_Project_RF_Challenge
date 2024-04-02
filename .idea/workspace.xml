@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2167e214-ed38-4cc3-bc88-865c1f5554e6" name="Changes" comment="added training and evaluation scripts and test dataset generation - v2">
+    <list default="true" id="2167e214-ed38-4cc3-bc88-865c1f5554e6" name="Changes" comment="- fixed a warning in SigSepDataset.py and removed unnecessary files&#10;&#10;- changes won't affect how the code is used">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/comm_utils/ofdm_helper.py" beforeDir="false" afterPath="$PROJECT_DIR$/comm_utils/ofdm_helper.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data_manipulation_utils/visualization_helpers.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_manipulation_utils/visualization_helpers.py" afterDir="false" />
@@ -172,7 +172,7 @@
       <workItem from="1711924027451" duration="3272000" />
       <workItem from="1711933246343" duration="10382000" />
       <workItem from="1711979617344" duration="11647000" />
-      <workItem from="1712014202536" duration="1008000" />
+      <workItem from="1712014202536" duration="1705000" />
     </task>
     <task id="LOCAL-00001" summary="1st commit - comm_utils package is the signal processing backbone of the project">
       <option name="closed" value="true" />
@@ -214,7 +214,15 @@
       <option name="project" value="LOCAL" />
       <updated>1711985995334</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="- fixed a warning in SigSepDataset.py and removed unnecessary files&#10;&#10;- changes won't affect how the code is used">
+      <option name="closed" value="true" />
+      <created>1712015906579</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1712015906579</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -226,7 +234,8 @@
     <MESSAGE value="added data manipulation package and made some modifications to dataset generation" />
     <MESSAGE value="added training and evaluation scripts and test dataset generation." />
     <MESSAGE value="added training and evaluation scripts and test dataset generation - v2" />
-    <option name="LAST_COMMIT_MESSAGE" value="added training and evaluation scripts and test dataset generation - v2" />
+    <MESSAGE value="- fixed a warning in SigSepDataset.py and removed unnecessary files&#10;&#10;- changes won't affect how the code is used" />
+    <option name="LAST_COMMIT_MESSAGE" value="- fixed a warning in SigSepDataset.py and removed unnecessary files&#10;&#10;- changes won't affect how the code is used" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

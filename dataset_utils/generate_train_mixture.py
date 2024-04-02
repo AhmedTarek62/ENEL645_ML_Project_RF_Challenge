@@ -25,7 +25,7 @@ def generate_train_mixture(soi_type, num_batches, batch_size,
                            intrf_path_dir=Path('rf_datasets/train_set_unmixed/interference_set_frame/')):
 
     dataset_path = Path(
-        'rf_datasets/train_set_mixed/datasets/{soi_type}_{datetime.now().strftime("%Y%m%d_%H%M%S")}')
+        f'rf_datasets/train_set_mixed/datasets/{soi_type}_{datetime.now().strftime("%Y%m%d_%H%M%S")}')
     os.makedirs(dataset_path)
 
     if soi_type == 'QPSK':
