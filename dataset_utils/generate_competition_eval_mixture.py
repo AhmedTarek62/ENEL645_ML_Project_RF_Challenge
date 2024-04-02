@@ -16,7 +16,7 @@ intrf_files = ['CommSignal2', 'CommSignal3', 'CommSignal5G1', 'EMISignal1']
 
 
 def generate_competition_eval_mixture(soi_type,
-                                      intrf_path_dir=Path('rf_datasets/train_set_unmixed/interference_set_frame/')):
+                                      intrf_path_dir=Path('rf_datasets/train_set_unmixed/testset1_frame/')):
     """
     Generate competition eval set which 100 test cases per target SINR level, ranging from -30 dB to 0 dB at 3 dB
     steps, with 100 test cases per target SINR level and interference signal.
