@@ -13,7 +13,7 @@ python -m pip install --upgrade pip
 python -m pip install tensorflow[and-cuda]
 python -m pip install torch torchvision torchaudio
 python -m pip install sionna
-python -m pip install -r requirments.txt
+python -m pip install -r requirements.txt
 ```
 
 Download interference files
