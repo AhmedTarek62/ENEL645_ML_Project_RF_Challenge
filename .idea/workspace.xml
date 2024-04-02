@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2167e214-ed38-4cc3-bc88-865c1f5554e6" name="Changes" comment="fixed path in generate_competition_eval_mixture.py" />
+    <list default="true" id="2167e214-ed38-4cc3-bc88-865c1f5554e6" name="Changes" comment="modified train_helpers.py" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -164,6 +164,7 @@
       <workItem from="1711933246343" duration="10382000" />
       <workItem from="1711979617344" duration="11647000" />
       <workItem from="1712014202536" duration="2598000" />
+      <workItem from="1712060215692" duration="439000" />
     </task>
     <task id="LOCAL-00001" summary="1st commit - comm_utils package is the signal processing backbone of the project">
       <option name="closed" value="true" />
@@ -229,7 +230,15 @@
       <option name="project" value="LOCAL" />
       <updated>1712016780308</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="modified train_helpers.py">
+      <option name="closed" value="true" />
+      <created>1712060653884</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1712060653884</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -243,7 +252,8 @@
     <MESSAGE value="added training and evaluation scripts and test dataset generation - v2" />
     <MESSAGE value="- fixed a warning in SigSepDataset.py and removed unnecessary files&#10;&#10;- changes won't affect how the code is used" />
     <MESSAGE value="fixed path in generate_competition_eval_mixture.py" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixed path in generate_competition_eval_mixture.py" />
+    <MESSAGE value="modified train_helpers.py" />
+    <option name="LAST_COMMIT_MESSAGE" value="modified train_helpers.py" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
