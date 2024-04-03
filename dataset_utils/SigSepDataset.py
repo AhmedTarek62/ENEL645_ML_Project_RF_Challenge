@@ -5,9 +5,8 @@ import numpy as np
 
 
 class SigSepDataset(Dataset):
-    def __init__(self, dataset_dir, dtype='real'):
-        self.filepaths_list = [os.path.join(
-            dataset_dir, batch_file) for batch_file in os.listdir(dataset_dir)]
+    def __init__(self, filepaths_list, dtype='real'):
+        self.filepaths_list = filepaths_list
         self.samples_per_batch = load(self.filepaths_list[0])[0].shape[0]
         self.dtype = dtype
 
@@ -18,7 +17,7 @@ class SigSepDataset(Dataset):
         imag_part = np.imag(array)
 
         # stack real and imaginary parts to get a 2D array
-        separated_array = np.stack((real_part, imag_part), axis=1).astype(np.float32)
+        separated_array = np.stack((real_part, imag_part), axis=0).astype(np.float32)
         return separated_array
 
     def __getitem__(self, index):

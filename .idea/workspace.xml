@@ -4,11 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2167e214-ed38-4cc3-bc88-865c1f5554e6" name="Changes" comment="modified train_helpers.py and UNet.py">
-      <change beforePath="$PROJECT_DIR$/.idea/ENEL645_ML_Project_RF_Challenge.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/ENEL645_ML_Project_RF_Challenge.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="2167e214-ed38-4cc3-bc88-865c1f5554e6" name="Changes" comment="fixed environment and new requirements.txt file">
+      <change afterPath="$PROJECT_DIR$/gen_train_and_test_sets.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/train_basic_UNet.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset_utils/SigSepDataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataset_utils/SigSepDataset.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/results_QPSK_CommSignal2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/training_utils/train_helpers.py" beforeDir="false" afterPath="$PROJECT_DIR$/training_utils/train_helpers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/training_utils/validation_helpers.py" beforeDir="false" afterPath="$PROJECT_DIR$/training_utils/validation_helpers.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,8 +45,10 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "Python.exploration.executor": "Run",
+    "Python.gen_train_and_test_sets.executor": "Run",
     "Python.test.executor": "Debug",
     "Python.train_and_eval_basic_UNet.executor": "Run",
+    "Python.train_basic_UNet.executor": "Debug",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
@@ -62,7 +68,7 @@
       <recent name="$PROJECT_DIR$/data_manipulation_utils" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.train_and_eval_basic_UNet">
+  <component name="RunManager" selected="Python.train_basic_UNet">
     <configuration name="exploration" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ENEL645_ML_Project_RF_Challenge" />
       <option name="ENV_FILES" value="" />
@@ -78,6 +84,29 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/exploration.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="gen_train_and_test_sets" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="ENEL645_ML_Project_RF_Challenge" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/gen_train_and_test_sets.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -132,8 +161,33 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="train_basic_UNet" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="ENEL645_ML_Project_RF_Challenge" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/train_basic_UNet.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.train_basic_UNet" />
+        <item itemvalue="Python.gen_train_and_test_sets" />
         <item itemvalue="Python.train_and_eval_basic_UNet" />
         <item itemvalue="Python.exploration" />
         <item itemvalue="Python.test" />
@@ -176,7 +230,7 @@
       <workItem from="1712108936616" duration="83000" />
       <workItem from="1712109593955" duration="4000" />
       <workItem from="1712131776003" duration="344000" />
-      <workItem from="1712143661067" duration="772000" />
+      <workItem from="1712143661067" duration="7198000" />
     </task>
     <task id="LOCAL-00001" summary="1st commit - comm_utils package is the signal processing backbone of the project">
       <option name="closed" value="true" />
@@ -266,7 +320,15 @@
       <option name="project" value="LOCAL" />
       <updated>1712104086061</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="fixed environment and new requirements.txt file">
+      <option name="closed" value="true" />
+      <created>1712145268013</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1712145268013</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -282,20 +344,21 @@
     <MESSAGE value="fixed path in generate_competition_eval_mixture.py" />
     <MESSAGE value="modified train_helpers.py" />
     <MESSAGE value="modified train_helpers.py and UNet.py" />
-    <option name="LAST_COMMIT_MESSAGE" value="modified train_helpers.py and UNet.py" />
+    <MESSAGE value="fixed environment and new requirements.txt file" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixed environment and new requirements.txt file" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/test.py</url>
-          <line>12</line>
-          <option name="timeStamp" value="12" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="jupyter-line">
           <url>notebook:///home/ahmedtarek59/PycharmProjects/ENEL645_ML_Project_RF_Challenge/train_and_evaluate_Basic_UNet.ipynb</url>
           <line>2</line>
           <option name="timeStamp" value="7" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/train_basic_UNet.py</url>
+          <line>44</line>
+          <option name="timeStamp" value="14" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -303,6 +366,8 @@
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/ENEL645_ML_Project_RF_Challenge$test.coverage" NAME="test Coverage Results" MODIFIED="1711981387826" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ENEL645_ML_Project_RF_Challenge$train_and_eval_basic_UNet.coverage" NAME="train_and_eval_basic_UNet Coverage Results" MODIFIED="1712144354355" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/ENEL645_ML_Project_RF_Challenge$gen_train_and_test_sets.coverage" NAME="gen_train_and_test_sets Coverage Results" MODIFIED="1712147791967" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/ENEL645_ML_Project_RF_Challenge$train_basic_UNet.coverage" NAME="train_basic_UNet Coverage Results" MODIFIED="1712150875248" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ENEL645_ML_Project_RF_Challenge$exploration.coverage" NAME="exploration Coverage Results" MODIFIED="1712144312638" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
