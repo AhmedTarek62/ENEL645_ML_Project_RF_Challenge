@@ -2,7 +2,7 @@ import argparse
 from models import UNet
 from dataset_utils import SigSepDataset
 from torch.utils.data import DataLoader
-from training_utils import train_epoch, evaluate_epoch, save_checkpoint
+from training_utils import train_epoch, evaluate_epoch, save_checkpoint, visualize_results
 from torch import nn
 from torch.optim import Adam, lr_scheduler
 import torch
@@ -13,7 +13,7 @@ from pathlib import Path
 def main(args):
     # Load development dataset files
     dataset_dir = Path(args.dataset_dir)
-    filepaths_list = [os.path.join(dataset_dir, batch_file) for batch_file in os.listdir(dataset_dir)]
+    filepaths_list = [os.path.join(dataset_dir, batch_file) for batch_file in os.listdir(dataset_dir)][:4]
 
     # Split into train and validation
     train_test_split = 0.8
@@ -45,21 +45,24 @@ def main(args):
     for epoch in range(num_epochs):
         train_loss = train_epoch(model, train_loader, criterion, optimizer, device)
         val_loss = evaluate_epoch(model, val_loader, criterion, device)
-        scheduler.step()
         print(f"Epoch {epoch + 1}/{num_epochs}, Training Loss: {round(train_loss, 4)}, "
               f"Validation Loss: {round(val_loss, 4)}")
+        visualize_results(model, val_loader, device, epoch + 1)
         # Check if the current validation loss is among the top k
         for i in range(top_k_checkpoints):
             if val_loss < best_val_losses[i]:
                 best_val_losses.insert(i, val_loss)
                 best_val_losses = best_val_losses[:top_k_checkpoints]  # Keep only the top k values
-                save_checkpoint(epoch + 1, model, optimizer, train_loss, val_loss, checkpoint_dir)
+                save_checkpoint(epoch + 1, model, optimizer, train_loss, val_loss, checkpoint_dir, 'UNet_')
                 break
+        scheduler.step()
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Train UNet model on a dataset')
-    parser.add_argument('--dataset_dir', type=str, help='Path to the dataset directory')
+    parser.add_argument('--dataset_dir', type=str,
+                        default='rf_datasets/train_set_mixed/datasets/QPSK_20240403_063637',
+                        help='Path to the dataset directory')
     parser.add_argument('--batch_size', type=int, default=16, help='Batch size for training')
     parser.add_argument('--num_workers', type=int, default=0, help='Number of workers for data loading')
     args = parser.parse_args()
