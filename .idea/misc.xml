@@ -3,5 +3,5 @@
   <component name="Black">
     <option name="sdkName" value="env_torch" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="env_torch" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.10 (rfenv)" project-jdk-type="Python SDK" />
 </project>
