@@ -37,7 +37,7 @@ class UNet(nn.Module):
             nn.ReLU(inplace=True),
             nn.Conv1d(64, 64, kernel_size=3, padding=1),
             nn.ReLU(inplace=True),
-            nn.Conv1d(64, 1, kernel_size=1),
+            nn.Conv1d(64, 2, kernel_size=1),
         )
 
     def forward(self, x):
