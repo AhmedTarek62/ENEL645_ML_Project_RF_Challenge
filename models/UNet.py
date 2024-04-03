@@ -7,7 +7,7 @@ class UNet(nn.Module):
 
         # Encoder
         self.encoder = nn.Sequential(
-            nn.Conv1d(1, 64, kernel_size=3, padding=1),
+            nn.Conv1d(2, 64, kernel_size=3, padding=1),
             nn.ReLU(inplace=True),
             nn.Conv1d(64, 128, kernel_size=3, padding=1),
             nn.ReLU(inplace=True),

@@ -12,8 +12,8 @@ def train_epoch(model, dataloader, criterion, optimizer, device):
         for i, sample in enumerate(pbar):
             sig_mixed, sig_target = sample[0], sample[1]
             if len(sig_mixed.shape) == 3:
-                sig_mixed = sig_mixed.view(-1, sig_mixed.shape[-2], sig_mixed.shape[-1]).float().to(device)
-                sig_target = sig_target.view(-1, sig_mixed.shape[-2], sig_target.shape[-1]).float().to(device)
+                sig_mixed = sig_mixed.view(-1, sig_mixed.shape[-1], sig_mixed.shape[-2]).float().to(device)
+                sig_target = sig_target.view(-1, sig_target.shape[-1], sig_target.shape[-2]).float().to(device)
             elif len(sig_mixed.shape) == 2:
                 sig_mixed = sig_mixed.view(-1, 1, sig_mixed.shape[-1]).float().to(device)
                 sig_target = sig_target.view(-1, 1, sig_target.shape[-1]).float().to(device)
