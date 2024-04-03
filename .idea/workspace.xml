@@ -4,19 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2167e214-ed38-4cc3-bc88-865c1f5554e6" name="Changes" comment="automated&#10;1- gen_train_and_test_sets.py&#10;2- train_basic_UNet.py&#10;&#10;fixed&#10;1- UNet.py">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comm_utils/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/comm_utils/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/comm_utils/sig_helper.py" beforeDir="false" afterPath="$PROJECT_DIR$/comm_utils/sig_helper.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/eval_utils/competition_eval_helpers.py" beforeDir="false" afterPath="$PROJECT_DIR$/eval_utils/competition_eval_helpers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/UNet.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/UNet.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notebooks/train_and_eval_basic_UNet.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_basic_UNet.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_basic_UNet.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_utils/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/training_utils/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_utils/train_helpers.py" beforeDir="false" afterPath="$PROJECT_DIR$/training_utils/train_helpers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/training_utils/validation_helpers.py" beforeDir="false" afterPath="$PROJECT_DIR$/training_utils/validation_helpers.py" afterDir="false" />
-    </list>
+    <list default="true" id="2167e214-ed38-4cc3-bc88-865c1f5554e6" name="Changes" comment="better training" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -51,7 +39,7 @@
     "Python.gen_train_and_test_sets.executor": "Run",
     "Python.test.executor": "Debug",
     "Python.train_and_eval_basic_UNet.executor": "Run",
-    "Python.train_basic_UNet.executor": "Debug",
+    "Python.train_basic_UNet.executor": "Run",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
@@ -234,7 +222,7 @@
       <workItem from="1712109593955" duration="4000" />
       <workItem from="1712131776003" duration="344000" />
       <workItem from="1712143661067" duration="9174000" />
-      <workItem from="1712157702973" duration="5657000" />
+      <workItem from="1712157702973" duration="6059000" />
     </task>
     <task id="LOCAL-00001" summary="1st commit - comm_utils package is the signal processing backbone of the project">
       <option name="closed" value="true" />
@@ -348,7 +336,15 @@
       <option name="project" value="LOCAL" />
       <updated>1712151669234</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="better training">
+      <option name="closed" value="true" />
+      <created>1712164602579</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1712164602580</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -367,7 +363,8 @@
     <MESSAGE value="fixed environment and new requirements.txt file" />
     <MESSAGE value="fixed issues in&#10;1- UNet.py &#10;2- train_helpers.py&#10;3- validation_helpers.py&#10;&#10;added&#10;1- gen_train_and_test_sets.py&#10;2- train_basic_UNet.py&#10;&#10;modified dataloading style in SigSepDataset.py" />
     <MESSAGE value="automated&#10;1- gen_train_and_test_sets.py&#10;2- train_basic_UNet.py&#10;&#10;fixed&#10;1- UNet.py" />
-    <option name="LAST_COMMIT_MESSAGE" value="automated&#10;1- gen_train_and_test_sets.py&#10;2- train_basic_UNet.py&#10;&#10;fixed&#10;1- UNet.py" />
+    <MESSAGE value="better training" />
+    <option name="LAST_COMMIT_MESSAGE" value="better training" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -377,11 +374,6 @@
           <line>2</line>
           <option name="timeStamp" value="7" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/train_basic_UNet.py</url>
-          <line>49</line>
-          <option name="timeStamp" value="9" />
-        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>
@@ -389,7 +381,7 @@
     <SUITE FILE_PATH="coverage/ENEL645_ML_Project_RF_Challenge$test.coverage" NAME="test Coverage Results" MODIFIED="1711981387826" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ENEL645_ML_Project_RF_Challenge$train_and_eval_basic_UNet.coverage" NAME="train_and_eval_basic_UNet Coverage Results" MODIFIED="1712144354355" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ENEL645_ML_Project_RF_Challenge$gen_train_and_test_sets.coverage" NAME="gen_train_and_test_sets Coverage Results" MODIFIED="1712147791967" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/ENEL645_ML_Project_RF_Challenge$train_basic_UNet.coverage" NAME="train_basic_UNet Coverage Results" MODIFIED="1712163768792" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/ENEL645_ML_Project_RF_Challenge$train_basic_UNet.coverage" NAME="train_basic_UNet Coverage Results" MODIFIED="1712164214125" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ENEL645_ML_Project_RF_Challenge$exploration.coverage" NAME="exploration Coverage Results" MODIFIED="1712144312638" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
