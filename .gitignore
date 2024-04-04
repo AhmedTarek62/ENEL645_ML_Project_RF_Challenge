@@ -6,3 +6,5 @@ torchmodels
 *.pt
 *.pth
 *.pkl
+venv
+checkpoints
