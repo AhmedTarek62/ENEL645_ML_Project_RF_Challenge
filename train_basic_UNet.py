@@ -13,7 +13,7 @@ from pathlib import Path
 def main(args):
     # Load development dataset files
     dataset_dir = Path(args.dataset_dir)
-    filepaths_list = [os.path.join(dataset_dir, batch_file) for batch_file in os.listdir(dataset_dir)][:4]
+    filepaths_list = [os.path.join(dataset_dir, batch_file) for batch_file in os.listdir(dataset_dir)]
 
     # Split into train and validation
     train_test_split = 0.8
