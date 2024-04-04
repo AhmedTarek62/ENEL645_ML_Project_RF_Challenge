@@ -16,8 +16,8 @@ def main(args):
     filepaths_list = [os.path.join(dataset_dir, batch_file) for batch_file in os.listdir(dataset_dir)]
 
     # Split into train and validation
-    train_test_split = 0.8
-    num_train_files = int(train_test_split * len(filepaths_list))
+    train_val_split = 0.8
+    num_train_files = int(train_val_split * len(filepaths_list))
     train_set = SigSepDataset(filepaths_list[:num_train_files], dtype='real')
     val_set = SigSepDataset(filepaths_list[num_train_files:], dtype='real')
 

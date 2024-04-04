@@ -47,13 +47,13 @@ def evaluate_competition(model, dataloader, soi_type, device,
 
                 # Calculate Ber
                 bits, _ = demodulator(sig_mixed)
-                bits_model, _ = demodulator(sig_target)
-                ber[intrf_label, idx_sinr] += np.sum(msg_bits != bits) / msg_bits.shape[1]
-                ber_model[intrf_label, idx_sinr] += np.sum(msg_bits != bits_model) / msg_bits.shape[1]
+                bits_model, _ = demodulator(sig_pred)
+                ber[intrf_label, idx_sinr] += np.sum(msg_bits != bits) / bits.shape[0]
+                ber_model[intrf_label, idx_sinr] += np.sum(msg_bits != bits_model) / bits.shape[0]
 
     mse_loss_model /= (len(dataloader) / len(intrf_sig_names) / len(all_sinr_db))
     mse_loss /= (len(dataloader) / len(intrf_sig_names) / len(all_sinr_db))
     ber_model /= (len(dataloader) / len(intrf_sig_names) / len(all_sinr_db))
     ber /= (len(dataloader) / len(intrf_sig_names) / len(all_sinr_db))
 
-    return mse_loss_model, mse_loss, ber_model, ber
+    return intrf_sig_names, all_sinr_db, mse_loss_model, mse_loss, ber_model, ber

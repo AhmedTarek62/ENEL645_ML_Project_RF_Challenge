@@ -1,1 +1,2 @@
 from .competition_eval_helpers import evaluate_competition
+from .competition_figures import plot_competition_figures

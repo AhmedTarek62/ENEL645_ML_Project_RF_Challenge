@@ -5,9 +5,10 @@ import numpy as np
 
 
 class SigSepDataset(Dataset):
-    def __init__(self, filepaths_list, dtype='real'):
+    def __init__(self, filepaths_list, preprocess=None, dtype='real'):
         self.filepaths_list = filepaths_list
         self.samples_per_batch = load(self.filepaths_list[0])[0].shape[0]
+        self.preprocess = preprocess
         self.dtype = dtype
 
     @staticmethod
@@ -24,6 +25,10 @@ class SigSepDataset(Dataset):
         file_index = index // self.samples_per_batch
         sample_index = index % self.samples_per_batch
         sig_mixed, sig_target, msg_bits, intrf_labels, sinr_db = load(self.filepaths_list[file_index])
+
+        if self.preprocess:
+            sig_mixed = self.preprocess(sig_mixed)
+            sig_target = self.preprocess(sig_target)
 
         if self.dtype == 'real':
             return (self.separate_real_imaginary(sig_mixed[sample_index]),

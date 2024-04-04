@@ -27,18 +27,25 @@ def evaluate_epoch(model, dataloader, criterion, device):
     return total_loss / (len(dataloader) * batch_size)
 
 
-def visualize_results(model, dataloader, device, epoch, num_samples=3):
-    def plot_complex_envelope(complex_sig: np.ndarray, label: str):
-        plt.plot(np.abs(complex_sig), label='Envelope', color='m')
-        plt.title(f'Envelope of {label}')
-        plt.xlabel('timestep')
-        plt.ylabel('Amplitude')
+def visualize_results(model, dataloader, device, epoch, num_samples=3, save=True):
+    def plot_complex_envelope(sig_mixed, sig_pred, sig_target):
+        figs, axs = plt.subplots(3, 1)
+        axs[0].plot(np.abs(sig_mixed), color='b')
+        axs[0].set_title(f'Envelope of mixture')
+        axs[0].set_xlabel('timestep')
+        axs[1].plot(np.abs(sig_pred), color='r')
+        axs[1].set_title(f'Envelope of prediction')
+        axs[1].set_xlabel('timestep')
+        axs[2].plot(np.abs(sig_target), color='m')
+        axs[2].set_title(f'Envelope of target')
+        axs[2].set_xlabel('timestep')
         plt.tight_layout()
-        plt.savefig(Path(f'checkpoints/figures/epoch_{epoch}_{label}_{i}.png'))
+        if save:
+            plt.savefig(Path(f'checkpoints/figures/epoch_{epoch}_{i}.png'))
         plt.show()
         plt.close()
 
-    num_symbols = 16 * 20
+    num_symbols = 16 * 100
     model.eval()
     with torch.no_grad():
         for i, sample in enumerate(dataloader):
@@ -53,6 +60,4 @@ def visualize_results(model, dataloader, device, epoch, num_samples=3):
             sig_target_numpy = split_to_complex_numpy(sig_target[0])[:num_symbols]
 
             # plot input, prediction and target
-            plot_complex_envelope(sig_mixed_numpy, 'mixture')
-            plot_complex_envelope(sig_pred_numpy, 'prediction')
-            plot_complex_envelope(sig_target_numpy, 'target')
+            plot_complex_envelope(sig_mixed_numpy, sig_pred_numpy, sig_target_numpy)
