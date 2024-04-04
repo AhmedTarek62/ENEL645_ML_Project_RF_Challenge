@@ -14,6 +14,12 @@ from datetime import datetime
 from joblib import dump
 
 
+def get_db(p): return 10*np.log10(p)
+def get_pow(s): return np.mean(np.abs(s)**2, axis=-1)
+def get_sinr(s, i): return get_pow(s)/get_pow(i)
+def get_sinr_db(s, i): return get_db(get_sinr(s, i))
+
+
 # CONSTANTS
 samples_per_symbol = 16
 ofdm_symbol_len = 80  # Cyclic Prefix (16) + Subcarriers (64)
@@ -65,6 +71,7 @@ def generate_train_mixture(soi_type, num_batches, batch_size, intrf_path_dir=Pat
                 (batch_size * len(intrf_frames), sig_len), dtype=complex)
             msg_bits_numpy = np.zeros(
                 (batch_size * len(intrf_frames), bits_per_stream))
+            sinr_db_numpy = np.zeros(batch_size * len(intrf_frames))
             for i, frame in enumerate(intrf_frames):
                 sample_indices = np.random.randint(
                     frame.shape[0], size=(batch_size,))
@@ -83,11 +90,11 @@ def generate_train_mixture(soi_type, num_batches, batch_size, intrf_path_dir=Pat
                               * batch_size, :] = sig_soi.numpy()
                 msg_bits_numpy[i * batch_size: (i + 1)
                                * batch_size, :] = msg_bits.numpy()
+                # save batch
+                sinr_db_numpy[i * batch_size: (i + 1)
+                              * batch_size] = get_sinr_db(sig_soi.numpy(), intrf_frame_snapshot.numpy() * gain_phasor.numpy())
                 del sig_mixed
 
-            # save batch
-            sinr_db_numpy = np.squeeze(
-                np.tile(sinr_db.numpy(), (len(intrf_frames), 1)))
             batch_data = [sig_mixed_numpy, sig_soi_numpy,
                           msg_bits_numpy, intrf_labels, sinr_db_numpy]
 
@@ -95,4 +102,4 @@ def generate_train_mixture(soi_type, num_batches, batch_size, intrf_path_dir=Pat
             dump(batch_data, os.path.join(dataset_path, mixture_filename))
 
     print(f'\nDataset saved at {dataset_path}')
-    return dataset_path
+    return dataset_path, batch_size, batch_size * len(intrf_frames)
