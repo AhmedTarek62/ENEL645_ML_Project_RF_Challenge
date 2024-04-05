@@ -4,7 +4,7 @@ from dataset_utils import generate_train_mixture, generate_competition_eval_mixt
 
 def main(args):
     # Generate train mixture
-    generate_train_mixture(args.soi_type, args.num_batches, args.batch_size)
+    generate_train_mixture(args.soi_type, args.num_batches, args.batch_size, sinr_dist=args.sinr_dist)
 
     # Generate competition evaluation mixture
     generate_competition_eval_mixture(args.soi_type)
@@ -15,5 +15,7 @@ if __name__ == "__main__":
     parser.add_argument('--soi_type', type=str, choices=['QPSK', 'QPSK_OFDM'], help='Type of signal of interest (SOI)')
     parser.add_argument('--num_batches', type=int, help='Number of batches to generate for training')
     parser.add_argument('--batch_size', type=int, help='Batch size for generating mixtures')
+    parser.add_argument('--sinr_dist', type=str, default='uniform', choices=['uniform', 'gaussian'],
+                        help='SINR distribution for training dataset')
     args = parser.parse_args()
     main(args)
