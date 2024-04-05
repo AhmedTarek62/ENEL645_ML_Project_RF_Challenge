@@ -1,2 +1,2 @@
-from .competition_eval_helpers import evaluate_competition, evaluate_competition_fast
+from .competition_eval_helpers import evaluate_competition, evaluate_competition_fast, evaluate_competition_faster
 from .competition_figures import plot_competition_figures
