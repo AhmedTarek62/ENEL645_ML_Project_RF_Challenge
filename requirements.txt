@@ -1,11 +1,3 @@
-torch~=2.2.2+cu118
-sionna~=0.16.2
-numpy~=1.26.4
-matplotlib~=3.8.3
-scipy~=1.13.0
-tqdm~=4.66.2
-h5py~=3.10.0
-joblib~=1.3.2
-omegaconf~=2.3.0
-tensorflow-cpu~=2.15.1
-torchsummary~=1.5.1
+joblib
+omegaconf
+tqdm
