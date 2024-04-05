@@ -49,7 +49,7 @@ class WaveNet(nn.Module):
                  residual_layers=30, dilation_cycle_length=10):
         super(WaveNet, self).__init__()
         self.input_projection = CausalConv1d(
-            input_channels, residual_channels, 1)
+            input_channels, residual_channels, 1, 1)
 
         self.residual_layers = nn.ModuleList([
             ResidualBlock(residual_channels, 2**(i % dilation_cycle_length))

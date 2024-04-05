@@ -9,10 +9,12 @@ It is highly recommended that a virtual environment setup is used. The following
 ```bash
 conda create -n rfchallenge python=3.11
 conda activate rfchallenge
-python -m pip install --upgrade pip
-python -m pip install tensorflow[and-cuda]
-python -m pip install torch torchvision torchaudio
+conda install -c conda-forge llvm-tools llvmdev
+python -m pip install --upgrade pip setuptools wheel
+pip install --upgrade ipykernel jupyterlab
 python -m pip install sionna
+python -m pip install tensorflow-cpu==2.15.1
+python -m pip install torch torchvision torchaudio
 python -m pip install -r requirements.txt
 ```
 

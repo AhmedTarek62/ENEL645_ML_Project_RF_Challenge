@@ -102,4 +102,4 @@ def generate_train_mixture(soi_type, num_batches, batch_size, intrf_path_dir=Pat
             dump(batch_data, os.path.join(dataset_path, mixture_filename))
 
     print(f'\nDataset saved at {dataset_path}')
-    return dataset_path, batch_size, batch_size * len(intrf_frames)
+    return dataset_path, batch_size * len(intrf_frames), batch_size

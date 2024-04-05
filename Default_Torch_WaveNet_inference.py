@@ -104,7 +104,7 @@ if __name__ == '__main__':
     parser.add_argument('--batch_size', type=int, default=32,
                         help='Batch size (number of examples per batch)')
     parser.add_argument('--interference_dir_path', type=str,
-                        default="rf_datasets/train_test_set_unmixed/datasets/testset1_frame/", help='Number of epochs to train the model')
+                        default="rf_datasets/train_test_set_unmixed/datasets/testset1_frame/", help='Path to the interference signals directory')
     args = parser.parse_args()
 
     dataset_path, num_batches, batch_size = generate_competition_eval_mixture(
