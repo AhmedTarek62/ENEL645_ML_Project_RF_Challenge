@@ -64,7 +64,9 @@ def main(**kwargs):
     print(f"\n\nUsing device: {device}")
 
     # load and split the dataset
-    dataset = SigSepDataset(dataset_path, dtype="real")
+    filepaths_list = [os.path.join(dataset_path, batch_file)
+                      for batch_file in os.listdir(dataset_path)]
+    dataset = SigSepDataset(filepaths_list, dtype="real")
     total_samples = len(dataset)
     train_samples = int(0.8 * total_samples)
     val_samples = total_samples - train_samples
@@ -91,6 +93,9 @@ def main(**kwargs):
     elif optimizer == "adamw":
         optimizer = torch.optim.AdamW(
             model.parameters(), lr=lr, weight_decay=1e-5)
+
+    scheduler = torch.optim.lr_scheduler.StepLR(
+        optimizer, step_size=5, gamma=0.01)
 
     scaler = torch.cuda.amp.GradScaler()
     criterion = torch.nn.MSELoss()
@@ -127,6 +132,8 @@ def main(**kwargs):
                 if file.endswith(f"vloss_{max_best_val_loss}.pt"):
                     os.remove(f"checkpoints/{file}")
 
+        scheduler.step()
+
     run.finish()
 
 
@@ -147,6 +154,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     if not args.dataset_path:
-        args.dataset_path, args.num_batches, batch_size = generate_train_mixture(
+        args.dataset_path = generate_train_mixture(
             soi_type=args.soi_type, num_batches=args.num_batches, batch_size=args.batch_size, intrf_path_dir=args.intrf_dataset_path)
     main(**vars(args))
