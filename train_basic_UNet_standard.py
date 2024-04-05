@@ -59,7 +59,7 @@ def main(args):
             if val_loss < best_val_losses[i]:
                 best_val_losses.insert(i, val_loss)
                 best_val_losses = best_val_losses[:top_k_checkpoints]  # Keep only the top k values
-                save_checkpoint(epoch + 1, model, optimizer, train_loss, val_loss, checkpoint_dir, 'UNet_')
+                save_checkpoint(epoch + 1, model, optimizer, train_loss, val_loss, checkpoint_dir, args.prefix)
                 break
         scheduler.step()
 
@@ -69,5 +69,7 @@ if __name__ == "__main__":
     parser.add_argument('--dataset_dir', type=str, help='Path to the dataset directory')
     parser.add_argument('--batch_size', type=int, default=16, help='Batch size for training')
     parser.add_argument('--num_workers', type=int, default=0, help='Number of workers for data loading')
+    parser.add_argument('--prefix', type=str, default='UNet_', help='Prefix for saving checkpoints')
+
     args = parser.parse_args()
     main(args)
