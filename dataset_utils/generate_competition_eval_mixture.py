@@ -49,7 +49,7 @@ def generate_competition_eval_mixture(soi_type,
     intrf_frames = list()
     for file in intrf_files:
         with h5py.File(os.path.join(intrf_path_dir, file + '_test1_raw_data.h5'), 'r') as data_h5file:
-            intrf_frames.append(np.array(data_h5file.get('dataset')))
+            intrf_frames.append(np.nan_to_num(np.array(data_h5file.get('dataset')), nan=0))
 
     all_sinr_db = np.arange(-30, 1, 3)
     num_test_cases = 100
@@ -66,39 +66,33 @@ def generate_competition_eval_mixture(soi_type,
         gain_complex = tf.complex(gain_linear, tf.zeros_like(gain_linear))
         phase = tf.random.uniform(shape=(num_test_cases, 1))
         phase_complex = tf.complex(phase, tf.zeros_like(phase))
-        gain_phasor = gain_complex * \
-            tf.math.exp(1j * 2 * np.pi * phase_complex)
-        sig_mixed_numpy = np.zeros(
-            (num_test_cases * num_intrf_signals, sig_len), dtype=complex)
-        sig_soi_numpy = np.zeros(
-            (num_test_cases * num_intrf_signals, sig_len), dtype=complex)
-        msg_bits_numpy = np.zeros(
-            (num_test_cases * num_intrf_signals, bits_per_stream))
-        sinr_db_numpy = np.zeros(num_test_cases * num_intrf_signals)
+        gain_phasor = gain_complex * tf.math.exp(1j * 2 * np.pi * phase_complex)
+        sig_mixed_numpy = np.zeros((num_test_cases * num_intrf_signals, sig_len), dtype=complex)
+        sig_soi_numpy = np.zeros((num_test_cases * num_intrf_signals, sig_len), dtype=complex)
+        msg_bits_numpy = np.zeros((num_test_cases * num_intrf_signals, bits_per_stream))
+
         for i, frame in enumerate(intrf_frames):
-            sample_indices = np.random.randint(
-                frame.shape[0], size=(num_test_cases,))
+            sample_indices = np.random.randint(frame.shape[0], size=(num_test_cases,))
             frame = frame[sample_indices, :]
-            snapshot_start_idx = np.random.randint(
-                frame.shape[1] - sig_len, size=frame.shape[0])
+            snapshot_start_idx = np.random.randint(frame.shape[1] - sig_len, size=frame.shape[0])
             snapshot_indices = tf.cast(snapshot_start_idx.reshape(-1, 1)
                                        + np.arange(sig_len).reshape(1, -1), tf.int32)
-            intrf_frame_snapshot = tf.experimental.numpy.take_along_axis(
-                frame, snapshot_indices, axis=1)
+            intrf_frame_snapshot = tf.experimental.numpy.take_along_axis(frame, snapshot_indices, axis=1)
+            snapshot_power = tf.reduce_mean(tf.abs(intrf_frame_snapshot) ** 2, axis=1)
+            snapshot_scaler = tf.expand_dims(
+                tf.complex(tf.sqrt(snapshot_power), tf.zeros_like(snapshot_power)), axis=1)
+            intrf_frame_snapshot /= snapshot_scaler
             sig_mixed = sig_soi + gain_phasor * intrf_frame_snapshot
-            sig_mixed_numpy[i * num_test_cases: (i + 1)
-                            * num_test_cases, :] = sig_mixed.numpy()
-            sig_soi_numpy[i * num_test_cases: (i + 1)
-                          * num_test_cases, :] = sig_soi.numpy()
-            msg_bits_numpy[i * num_test_cases: (i + 1)
-                           * num_test_cases, :] = msg_bits.numpy()
-            # save SINR case
-            sinr_db_numpy[i * num_test_cases: (i + 1) *
-                          num_test_cases] = get_sinr_db(sig_soi.numpy(), intrf_frame_snapshot.numpy() * gain_phasor.numpy())
+            sig_mixed_numpy[i * num_test_cases: (i + 1) * num_test_cases, :] = sig_mixed.numpy()
+            sig_soi_numpy[i * num_test_cases: (i + 1) * num_test_cases, :] = sig_soi.numpy()
+            msg_bits_numpy[i * num_test_cases: (i + 1) * num_test_cases, :] = msg_bits.numpy()
+            # check SINR case
+            measured_sinr = get_sinr_db(sig_soi.numpy(), intrf_frame_snapshot.numpy() * gain_phasor.numpy())
+            assert all(np.abs(measured_sinr - sinr_db) < 1e-2)
             del sig_mixed
 
-        batch_data = [sig_mixed_numpy, sig_soi_numpy,
-                      msg_bits_numpy, intrf_labels, sinr_db_numpy]
+        sinr_db_numpy = sinr_db * np.ones((num_test_cases * num_intrf_signals))
+        batch_data = [sig_mixed_numpy, sig_soi_numpy, msg_bits_numpy, intrf_labels, sinr_db_numpy]
         mixture_filename = f'{soi_type}_sinr_{sinr_db}'
         dump(batch_data, os.path.join(dataset_path, mixture_filename))
 

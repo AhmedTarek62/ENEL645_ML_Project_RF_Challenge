@@ -5,7 +5,7 @@ It also plots the MSE and BER curves
 """
 
 import torch
-from src.Default_Torch_WaveNet import Wave
+from src.DefaultTorchWaveNet import Wave
 from omegaconf import OmegaConf
 from dataset_utils import generate_competition_eval_mixture
 from dataset_utils import SigSepDataset
@@ -26,7 +26,8 @@ def main(**kwargs):
     # load the model
     cfg = OmegaConf.load("src/configs/wavenet.yaml")
     model = Wave(cfg.model).to(device)
-    model.load_state_dict(torch.load(kwargs['model_path'])["model"])
+    baseline_ckpt_path = 'saved_models/torch_models/dataset_qpsk_commsignal2_mixture_wavenet/weights-206000.pt'
+    model.load_state_dict(torch.load(baseline_ckpt_path)["model"])
 
     print(
         f"The model has {sum(p.numel() for p in model.parameters())/1e6} million parameters")
@@ -96,7 +97,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Perform inference on the test1 data mixture')
     parser.add_argument('--model_path', type=str,
-                        default='torchmodels/model.pth', help='Path to the trained model')
+                        default='torch_models/model.pth', help='Path to the trained model')
     parser.add_argument('--soi_type', type=str, default='QPSK',
                         help='Type of signal of interest (QPSK/QPSK_OFDM)')
     parser.add_argument('--interference_type', type=str, default='CommSignal2',
