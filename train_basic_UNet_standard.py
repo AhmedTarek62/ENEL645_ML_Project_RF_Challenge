@@ -13,8 +13,7 @@ from pathlib import Path
 
 def main(args):
     # Load development dataset files
-    # dataset_dir = Path(args.dataset_dir)
-    dataset_dir = Path('rf_datasets/train_set_mixed/datasets/QPSK_20240405_054711')
+    dataset_dir = Path(args.dataset_dir)
     filepaths_list = [os.path.join(dataset_dir, batch_file) for batch_file in os.listdir(dataset_dir)]
 
     # Split into train and validation
