@@ -30,6 +30,16 @@ def split_to_complex(torch_tensor):
     return complex_tensor
 
 
+def split_to_complex_batch(torch_tensor):
+    tf_tensor = tf.convert_to_tensor(torch_tensor)
+    real_part = tf_tensor[:, 0, :]
+    imaginary_part = tf_tensor[:, 1, :]
+    # Create complex tensor
+    complex_tensor = tf.complex(real_part, imaginary_part)
+
+    return complex_tensor
+
+
 def split_to_complex_numpy(torch_tensor):
     # Splitting real and imaginary parts
     arr = torch_tensor.detach().cpu().numpy()

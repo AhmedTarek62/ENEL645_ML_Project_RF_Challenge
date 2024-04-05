@@ -35,7 +35,7 @@ unzip  reference_models.zip
 rm reference_models.zip
 
 # run inference model on QPSK signal and CommSignal2 interference
-python Default_Torch_WaveNet_inference.py --model_path=torchmodels/dataset_qpsk_commsignal2_mixture_wavenet/weights-206000.pt --soi_type=QPSK --batch_size=4 --interference_dir_path=rf_datasets/train_test_set_unmixed/dataset/testset1_frame
+python wave_net_inference.py --model_path=torch_models/dataset_qpsk_commsignal2_mixture_wavenet/weights-206000.pt --soi_type=QPSK --batch_size=4 --interference_dir_path=rf_datasets/train_test_set_unmixed/dataset/testset1_frame
 ```
 
 ## Project Files
@@ -43,7 +43,7 @@ python Default_Torch_WaveNet_inference.py --model_path=torchmodels/dataset_qpsk_
 The project files are arranged as follows
 ```bash
 .
-|-- Default_Torch_WaveNet_inference.py
+|-- wave_net_inference.py
 |-- README.md
 |-- comm_utils
 |   |-- __init__.py
@@ -72,7 +72,7 @@ The project files are arranged as follows
 |   `-- train_and_eval_basic_UNet.ipynb
 |-- requirements.txt
 |-- src
-|   |-- Default_Torch_WaveNet.py
+|   |-- DefaultTorchWaveNet.py
 |   |-- __init__.py
 |   |-- config_torchwavenet.py
 |   `-- configs

@@ -14,9 +14,9 @@ from datetime import datetime
 from joblib import dump
 
 
-def get_db(p): return 10*np.log10(p)
+def get_db(p): return 10 * np.log10(p)
 def get_pow(s): return np.mean(np.abs(s)**2, axis=-1)
-def get_sinr(s, i): return get_pow(s)/get_pow(i)
+def get_sinr(s, i): return get_pow(s) / get_pow(i)
 def get_sinr_db(s, i): return get_db(get_sinr(s, i))
 
 
@@ -48,11 +48,11 @@ def generate_train_mixture(soi_type, num_batches, batch_size,
     intrf_frames = list()
     for file in intrf_files:
         with h5py.File(os.path.join(intrf_path_dir, file + '_raw_data.h5'), 'r') as data_h5file:
-            intrf_frames.append(np.array(data_h5file.get('dataset')))
+            intrf_frames.append(np.nan_to_num(np.array(data_h5file.get('dataset')), nan=0))
 
     batch_size //= len(intrf_frames)
-    intrf_labels = np.array([i for i in range(len(intrf_frames))
-                            for _ in range(batch_size)])
+    intrf_labels = np.array([i for i in range(len(intrf_frames)) for _ in range(batch_size)])
+
     with tqdm(range(num_batches), desc='Data Generation', unit='batch') as pbar:
         for batch in pbar:
             sig_soi, msg_bits = gen_soi(batch_size, num_symbols)
@@ -64,41 +64,34 @@ def generate_train_mixture(soi_type, num_batches, batch_size,
             gain_complex = tf.complex(gain_linear, tf.zeros_like(gain_linear))
             phase = tf.random.uniform(shape=(batch_size, 1))
             phase_complex = tf.complex(phase, tf.zeros_like(phase))
-            gain_phasor = gain_complex * \
-                tf.math.exp(1j * 2 * np.pi * phase_complex)
+            gain_phasor = gain_complex * tf.math.exp(1j * 2 * np.pi * phase_complex)
 
-            sig_mixed_numpy = np.zeros(
-                (batch_size * len(intrf_frames), sig_len), dtype=complex)
-            sig_soi_numpy = np.zeros(
-                (batch_size * len(intrf_frames), sig_len), dtype=complex)
-            msg_bits_numpy = np.zeros(
-                (batch_size * len(intrf_frames), bits_per_stream))
-            sinr_db_numpy = np.zeros(batch_size * len(intrf_frames))
+            sig_mixed_numpy = np.zeros((batch_size * len(intrf_frames), sig_len), dtype=complex)
+            sig_soi_numpy = np.zeros((batch_size * len(intrf_frames), sig_len), dtype=complex)
+            msg_bits_numpy = np.zeros((batch_size * len(intrf_frames), bits_per_stream))
+
             for i, frame in enumerate(intrf_frames):
-                sample_indices = np.random.randint(
-                    frame.shape[0], size=(batch_size,))
+                sample_indices = np.random.randint(frame.shape[0], size=(batch_size,))
                 frame = frame[sample_indices, :]
-                snapshot_start_idx = np.random.randint(
-                    frame.shape[1] - sig_len, size=frame.shape[0])
+                snapshot_start_idx = np.random.randint(frame.shape[1] - sig_len, size=frame.shape[0])
                 snapshot_indices = tf.cast(snapshot_start_idx.reshape(-1, 1)
                                            + np.arange(sig_len).reshape(1, -1), tf.int32)
-                intrf_frame_snapshot = tf.experimental.numpy.take_along_axis(
-                    frame, snapshot_indices, axis=1)
+                intrf_frame_snapshot = tf.experimental.numpy.take_along_axis(frame, snapshot_indices, axis=1)
+                snapshot_power = tf.reduce_mean(tf.abs(intrf_frame_snapshot) ** 2, axis=1)
+                snapshot_scaler = tf.expand_dims(
+                    tf.complex(tf.sqrt(snapshot_power), tf.zeros_like(snapshot_power)), axis=1)
+                intrf_frame_snapshot /= snapshot_scaler
                 sig_mixed = sig_soi + gain_phasor * intrf_frame_snapshot
 
-                sig_mixed_numpy[i * batch_size: (i + 1)
-                                * batch_size, :] = sig_mixed.numpy()
-                sig_soi_numpy[i * batch_size: (i + 1)
-                              * batch_size, :] = sig_soi.numpy()
-                msg_bits_numpy[i * batch_size: (i + 1)
-                               * batch_size, :] = msg_bits.numpy()
-                # save batch
-                sinr_db_numpy[i * batch_size: (i + 1)
-                              * batch_size] = get_sinr_db(sig_soi.numpy(), intrf_frame_snapshot.numpy() * gain_phasor.numpy())
+                sig_mixed_numpy[i * batch_size: (i + 1) * batch_size, :] = sig_mixed.numpy()
+                sig_soi_numpy[i * batch_size: (i + 1) * batch_size, :] = sig_soi.numpy()
+                msg_bits_numpy[i * batch_size: (i + 1) * batch_size, :] = msg_bits.numpy()
+                measured_sinr = get_sinr_db(sig_soi.numpy(), intrf_frame_snapshot.numpy() * gain_phasor.numpy())
+                assert all(measured_sinr - np.squeeze(sinr_db.numpy()) < 1e-2)
                 del sig_mixed
 
-            batch_data = [sig_mixed_numpy, sig_soi_numpy,
-                          msg_bits_numpy, intrf_labels, sinr_db_numpy]
+            sinr_db_numpy = np.squeeze(np.tile(sinr_db.numpy(), (len(intrf_frames), 1)))
+            batch_data = [sig_mixed_numpy, sig_soi_numpy, msg_bits_numpy, intrf_labels, sinr_db_numpy]
 
             mixture_filename = f'{soi_type}_batch_{batch}'
             dump(batch_data, os.path.join(dataset_path, mixture_filename))
