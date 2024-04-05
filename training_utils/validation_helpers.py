@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 from comm_utils import split_to_complex_numpy
 from pathlib import Path
 
+import os
+
 
 def evaluate_epoch(model, dataloader, criterion, device):
     model.eval()
@@ -28,6 +30,8 @@ def evaluate_epoch(model, dataloader, criterion, device):
 
 
 def visualize_results(model, dataloader, device, epoch, num_samples=3, save=True):
+    if not os.path.exists("checkpoints/figures"):
+        os.makedirs("checkpoints/figures")
     def plot_complex_envelope(sig_mixed, sig_pred, sig_target):
         figs, axs = plt.subplots(3, 1)
         axs[0].plot(np.abs(sig_mixed), color='b')

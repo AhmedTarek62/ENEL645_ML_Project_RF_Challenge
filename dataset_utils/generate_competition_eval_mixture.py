@@ -52,7 +52,7 @@ def generate_competition_eval_mixture(soi_type,
             intrf_frames.append(np.array(data_h5file.get('dataset')))
 
     all_sinr_db = np.arange(-30, 1, 3)
-    num_test_cases = 100
+    num_test_cases = 10
     num_intrf_signals = len(intrf_files)
     intrf_labels = np.array([i for i in range(len(intrf_frames))
                             for _ in range(num_test_cases)])

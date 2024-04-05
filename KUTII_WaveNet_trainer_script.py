@@ -79,7 +79,7 @@ def main(**kwargs):
 
     model_params = {
         "input_channels": 2,
-        "residual_channels": 512,
+        "residual_channels": 256,
         "residual_layers": 30,
         "dilation_cycle_length": 10
     }
@@ -118,14 +118,15 @@ def main(**kwargs):
         print(f"\tTrain Loss: {avg_tloss}")
         print(f"\tValidation Loss: {avg_vloss}")
 
-        run.log({"train_loss": avg_tloss, "avg_vloss": avg_vloss})
+        run.log({"train_loss": avg_tloss, "val_loss": avg_vloss})
 
         if avg_vloss < max(best_val_loss):
             max_best_val_loss = max(best_val_loss)
             idx = best_val_loss.index(max_best_val_loss)
             best_val_loss[idx] = avg_vloss
-            torch.save(model.state_dict(),
-                       f"checkpoints/KUTII_WaveNet_{kwargs["soi_type"]}-{epoch+1}_{avg_vloss}.pt")
+            torch.save({"model_state_dict": model.state_dict(),
+                        "model_params": model_params},
+                       f"checkpoints/KUTII_WaveNet_{kwargs['soi_type']}-{epoch+1}_{avg_vloss}.pt")
             print(f"Model saved at checkpoints/model_{epoch+1}_{avg_vloss}.pt")
 
             for file in os.listdir("checkpoints"):
