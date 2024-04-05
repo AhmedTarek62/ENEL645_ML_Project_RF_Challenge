@@ -29,7 +29,7 @@ def plot_complex_signal(complex_signal):
 
     # Envelope
     plt.subplot(3, 1, 3)
-    plt.plot(time_axis, np.imag(complex_signal),  label='Envelope', color='m')
+    plt.plot(time_axis, np.abs(complex_signal),  label='Envelope', color='m')
     plt.title('Envelope of Complex Signal')
     plt.xlabel('timestep')
     plt.ylabel('Amplitude')

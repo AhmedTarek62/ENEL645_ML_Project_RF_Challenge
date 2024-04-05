@@ -27,8 +27,9 @@ sig_len = 40_960
 intrf_files = ['CommSignal2', 'CommSignal3', 'CommSignal5G1', 'EMISignal1']
 
 
-def generate_train_mixture(soi_type, num_batches, batch_size, intrf_path_dir=Path('rf_datasets/train_set_unmixed/interference_set_frame/')):
-    # os.makedirs('rf_datasets/train_set_mixed', exist_ok=True)
+def generate_train_mixture(soi_type, num_batches, batch_size,
+                           intrf_path_dir=Path('rf_datasets/train_set_unmixed/interference_set_frame/')):
+
     dataset_path = Path(
         f'rf_datasets/train_set_mixed/datasets/{soi_type}_{datetime.now().strftime("%Y%m%d_%H%M%S")}')
     os.makedirs(dataset_path)
@@ -48,6 +49,7 @@ def generate_train_mixture(soi_type, num_batches, batch_size, intrf_path_dir=Pat
     for file in intrf_files:
         with h5py.File(os.path.join(intrf_path_dir, file + '_raw_data.h5'), 'r') as data_h5file:
             intrf_frames.append(np.array(data_h5file.get('dataset')))
+
     batch_size //= len(intrf_frames)
     intrf_labels = np.array([i for i in range(len(intrf_frames))
                             for _ in range(batch_size)])
@@ -102,4 +104,4 @@ def generate_train_mixture(soi_type, num_batches, batch_size, intrf_path_dir=Pat
             dump(batch_data, os.path.join(dataset_path, mixture_filename))
 
     print(f'\nDataset saved at {dataset_path}')
-    return dataset_path, batch_size * len(intrf_frames), batch_size
+    return dataset_path

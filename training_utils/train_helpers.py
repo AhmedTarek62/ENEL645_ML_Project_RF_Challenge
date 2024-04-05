@@ -10,9 +10,7 @@ def train_epoch(model, dataloader, criterion, optimizer, device):
 
     with tqdm(dataloader, desc='Training', unit='batch') as pbar:
         for i, sample in enumerate(pbar):
-            sig_mixed, sig_target = sample[0], sample[1]
-            sig_mixed = sig_mixed.view(-1, 1, sig_mixed.shape[-1]).float().to(device)
-            sig_target = sig_target.view(-1, 1, sig_target.shape[-1]).float().to(device)
+            sig_mixed, sig_target = sample[0].float().to(device), sample[1].float().to(device)
             optimizer.zero_grad()
             sig_pred = model(sig_mixed)
             loss = criterion(sig_pred, sig_target)
@@ -28,7 +26,7 @@ def train_epoch(model, dataloader, criterion, optimizer, device):
     return total_loss / (len(dataloader) * batch_size)
 
 
-def save_checkpoint(epoch, model, optimizer, train_loss, val_loss, checkpoint_dir):
+def save_checkpoint(epoch, model, optimizer, train_loss, val_loss, checkpoint_dir, prefix=''):
     checkpoint_info = {
         'epoch': epoch,
         'model_state_dict': model.state_dict(),
@@ -36,5 +34,5 @@ def save_checkpoint(epoch, model, optimizer, train_loss, val_loss, checkpoint_di
         'train_loss': train_loss,
         'validation_loss': val_loss
     }
-    checkpoint_path = os.path.join(checkpoint_dir, f'model_epoch_{epoch}_val_loss_{val_loss:.4f}.pt')
+    checkpoint_path = os.path.join(checkpoint_dir, f'{prefix}model_epoch_{epoch}_val_loss_{val_loss:.4f}.pt')
     torch.save(checkpoint_info, checkpoint_path)

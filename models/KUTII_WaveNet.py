@@ -45,7 +45,7 @@ class ResidualBlock(nn.Module):
 
 class WaveNet(nn.Module):
     def __init__(self, input_channels=2,
-                 residual_channels=512,
+                 residual_channels=128,
                  residual_layers=30, dilation_cycle_length=10):
         super(WaveNet, self).__init__()
         self.input_projection = CausalConv1d(

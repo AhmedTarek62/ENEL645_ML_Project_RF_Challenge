@@ -2,12 +2,12 @@ import torch.nn as nn
 
 
 class UNet(nn.Module):
-    def __init__(self):
+    def __init__(self, in_channels=2):
         super(UNet, self).__init__()
 
         # Encoder
         self.encoder = nn.Sequential(
-            nn.Conv1d(1, 64, kernel_size=3, padding=1),
+            nn.Conv1d(in_channels, 64, kernel_size=3, padding=1),
             nn.ReLU(inplace=True),
             nn.Conv1d(64, 128, kernel_size=3, padding=1),
             nn.ReLU(inplace=True),
@@ -37,7 +37,7 @@ class UNet(nn.Module):
             nn.ReLU(inplace=True),
             nn.Conv1d(64, 64, kernel_size=3, padding=1),
             nn.ReLU(inplace=True),
-            nn.Conv1d(64, 1, kernel_size=1),
+            nn.Conv1d(64, in_channels, kernel_size=1),
         )
 
     def forward(self, x):

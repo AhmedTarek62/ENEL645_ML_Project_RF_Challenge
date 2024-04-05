@@ -62,7 +62,6 @@ def modulate_ofdm_signal(msg_bits, resource_grid, ebno_db=None):
         y = awgn_channel([x_ofdm, no])
     # squeeze axis corresponding to num_tx, num_streams_per_tx (assumed to be 1)
     y = tf.squeeze(y, axis=[1, 2])
-    x_rg = tf.squeeze(x_rg, axis=[1, 2])
     msg_bits = tf.squeeze(msg_bits, axis=[1, 2])
     return y, msg_bits
 

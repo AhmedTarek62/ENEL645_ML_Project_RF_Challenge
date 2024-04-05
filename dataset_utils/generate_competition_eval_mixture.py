@@ -21,15 +21,16 @@ sig_len = 40_960
 intrf_files = ['CommSignal2', 'CommSignal3', 'CommSignal5G1', 'EMISignal1']
 
 
-def generate_competition_eval_mixture(soi_type, intrf_path_dir=Path('rf_datasets/train_set_unmixed/interference_set_frame/')):
+def generate_competition_eval_mixture(soi_type,
+                                      intrf_path_dir=Path('rf_datasets/train_set_unmixed/testset1_frame/')):
     """
     Generate competition eval set which 100 test cases per target SINR level, ranging from -30 dB to 0 dB at 3 dB
     steps, with 100 test cases per target SINR level and interference signal.
     :param soi_type:
+    :param intrf_path_dir:
     :return:
     """
 
-    # os.makedirs('datasets', exist_ok=True)
     dataset_path = Path(
         f'rf_datasets/test_set_mixed/datasets/eval_{soi_type}_{datetime.now().strftime("%Y%m%d_%H%M%S")}')
     os.makedirs(dataset_path)
@@ -56,6 +57,7 @@ def generate_competition_eval_mixture(soi_type, intrf_path_dir=Path('rf_datasets
     intrf_labels = np.array([i for i in range(len(intrf_frames))
                             for _ in range(num_test_cases)])
     num_batches = len(all_sinr_db)
+
     for sinr_db in tqdm(all_sinr_db, desc='Generating Evaluation Data', unit='SINR Value'):
         sig_soi, msg_bits = gen_soi(num_test_cases, num_symbols)
         padding = [[0, 0], [0, sig_len - sig_soi.shape[1]]]
