@@ -28,7 +28,8 @@ intrf_files = ['CommSignal2', 'CommSignal3', 'CommSignal5G1', 'EMISignal1']
 
 
 def generate_train_mixture(soi_type, num_batches, batch_size,
-                           intrf_path_dir=Path('rf_datasets/train_set_unmixed/interference_set_frame/')):
+                           intrf_path_dir=Path('rf_datasets/train_set_unmixed/interference_set_frame/'),
+                           sinr_dist='uniform'):
 
     dataset_path = Path(
         f'rf_datasets/train_set_mixed/datasets/{soi_type}_{datetime.now().strftime("%Y%m%d_%H%M%S")}')
@@ -59,7 +60,10 @@ def generate_train_mixture(soi_type, num_batches, batch_size,
             padding = [[0, 0], [0, sig_len - sig_soi.shape[1]]]
             sig_soi = tf.pad(sig_soi, padding, "CONSTANT")
             # Generate random SINR values in decibels
-            sinr_db = -31 * tf.random.uniform(shape=(batch_size, 1)) + 1
+            if sinr_dist == 'uniform':
+                sinr_db = -31 * tf.random.uniform(shape=(batch_size, 1)) + 1
+            elif sinr_dist == 'gaussian':
+                sinr_db = tf.random.normal(shape=(batch_size, 1), mean=-15, stddev=6)
             gain_linear = tf.pow(10.0, -0.5 * sinr_db / 10)
             gain_complex = tf.complex(gain_linear, tf.zeros_like(gain_linear))
             phase = tf.random.uniform(shape=(batch_size, 1))
