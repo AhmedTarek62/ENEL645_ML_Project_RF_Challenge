@@ -6,5 +6,7 @@ torchmodels
 *.pt
 *.pth
 *.pkl
+slurm-*.out
 venv
 checkpoints
+wandb

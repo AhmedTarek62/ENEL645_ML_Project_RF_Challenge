@@ -125,7 +125,7 @@ def main(**kwargs):
             idx = best_val_loss.index(max_best_val_loss)
             best_val_loss[idx] = avg_vloss
             torch.save(model.state_dict(),
-                       f"checkpoints/model_{epoch+1}_{avg_vloss}.pt")
+                       f"checkpoints/KUTII_WaveNet_{kwargs["soi_type"]}-{epoch+1}_{avg_vloss}.pt")
             print(f"Model saved at checkpoints/model_{epoch+1}_{avg_vloss}.pt")
 
             for file in os.listdir("checkpoints"):
