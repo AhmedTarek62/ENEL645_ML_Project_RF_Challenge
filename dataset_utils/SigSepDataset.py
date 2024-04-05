@@ -28,7 +28,6 @@ class SigSepDataset(Dataset):
 
         if self.preprocess:
             sig_mixed = self.preprocess(sig_mixed)
-            sig_target = self.preprocess(sig_target)
 
         if self.dtype == 'real':
             return (self.separate_real_imaginary(sig_mixed[sample_index]),
