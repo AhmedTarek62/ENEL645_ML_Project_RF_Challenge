@@ -1,4 +1,5 @@
 import torch.nn as nn
+import torch
 
 
 class UNet(nn.Module):
@@ -51,3 +52,80 @@ class UNet(nn.Module):
         x3 = self.decoder(x2)
 
         return x3
+
+
+class UNetBlock(nn.Module):
+    def __init__(self, in_channels, out_channels, kernel_size=3):
+        super(UNetBlock, self).__init__()
+        self.out_channels = out_channels
+        self.block = nn.Sequential(
+            nn.Conv1d(in_channels, out_channels, kernel_size, padding=1),
+            nn.BatchNorm1d(out_channels),
+            nn.ReLU(inplace=True),
+            nn.Conv1d(out_channels, out_channels, kernel_size, padding=1),
+            nn.BatchNorm1d(out_channels),
+            nn.ReLU(inplace=True),
+        )
+
+    def forward(self, x):
+        return self.block(x)
+
+
+class GeneralUNet(nn.Module):
+    def __init__(self, in_channels=2, kernel_size=3):
+        super(GeneralUNet, self).__init__()
+
+        # encoder
+        self.encoder_blocks = [
+            UNetBlock(in_channels=in_channels, out_channels=32, kernel_size=kernel_size),
+            UNetBlock(in_channels=32, out_channels=64, kernel_size=kernel_size),
+            UNetBlock(in_channels=64, out_channels=128, kernel_size=kernel_size),
+            UNetBlock(in_channels=128, out_channels=256, kernel_size=kernel_size)
+        ]
+
+        # max pooling layer that is used after each encoder block
+        self.max_pool_1d = nn.MaxPool1d(kernel_size=2, stride=2, return_indices=True)
+
+        # bottleneck layer
+        self.bottleneck_layer = UNetBlock(in_channels=256, out_channels=512, kernel_size=kernel_size)
+
+        skip_conn_dims = [block.out_channels for block in self.encoder_blocks]
+
+        # decoder
+        self.decoder_blocks =\
+            [UNetBlock(in_channels=512 + skip_conn_dims[-1], out_channels=256, kernel_size=kernel_size),
+             UNetBlock(in_channels=256 + skip_conn_dims[-2], out_channels=128, kernel_size=kernel_size),
+             UNetBlock(in_channels=128 + skip_conn_dims[-3], out_channels=64, kernel_size=kernel_size),
+             UNetBlock(in_channels=64 + skip_conn_dims[-4], out_channels=32, kernel_size=kernel_size)
+        ]
+
+        # max unpooling layer that is used after each decoder block
+        self.max_unpool_1d = nn.MaxUnpool1d(kernel_size=2, stride=2)
+
+        # output layer
+        self.out_conv = nn.Conv1d(in_channels=32, out_channels=in_channels, kernel_size=kernel_size, padding=1)
+
+    def forward(self, x):
+        # encoder pass
+        encoder_outputs = []
+        pooling_indices = []
+        for encoder_block in self.encoder_blocks:
+            x = encoder_block(x)
+            x, indices = self.max_pool_1d(x)
+            encoder_outputs.append(x)
+            pooling_indices.append(indices)
+
+        x = self.bottleneck_layer(x)
+
+        # decoder pass
+        for i, decoder_block in enumerate(self.decoder_blocks):
+            x = torch.cat([x, encoder_outputs[-(i + 1)]], dim=1)
+            x = decoder_block(x)
+            x = self.max_unpool_1d(x, pooling_indices[-(i + 1)])
+
+        return self.out_conv(x)
+
+
+torch_tensor = torch.rand((8, 2, 40960))
+model = GeneralUNet(in_channels=2)
+out = model(torch_tensor)
