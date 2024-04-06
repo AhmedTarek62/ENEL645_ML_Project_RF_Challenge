@@ -44,11 +44,12 @@ def validation_loop(model, val_loader, epoch, criterion, device, callback=None):
     with torch.no_grad():
         for (soi_mix, soi_target, msg_bits, intrf_type, sinr) in tqdm(val_loader, desc=f'Validation: [Epoch {epoch + 1}]', unit='batch'):
             soi_mix, soi_target = soi_mix.to(device), soi_target.to(device)
-            soi_est = model(soi_mix)
-            if callback is not None:
-                callback(soi_est, soi_target, dict(
-                    zip(msg_bits, intrf_type, sinr)))
+            with torch.cuda.amp.autocast():
+                soi_est = model(soi_mix)
             loss = criterion(soi_est, soi_target)
+            if callback is not None:
+                callback(soi_est.cpu().detach(), soi_target.cpu().detach(), dict(
+                    zip(msg_bits, intrf_type, sinr)))
             total_loss += loss.item()
     return total_loss / len(val_loader)
 
@@ -81,7 +82,7 @@ def main(**kwargs):
         "input_channels": 2,
         "residual_channels": 256,
         "residual_layers": 30,
-        "dilation_cycle_length": 10
+        "dilation_cycle_length": 20
     }
 
     model = WaveNet(**model_params).to(device)
