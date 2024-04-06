@@ -65,7 +65,7 @@ def main(args):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Train General UNet model on a dataset')
+    parser = argparse.ArgumentParser(description='Train general UNet model on a dataset')
     parser.add_argument('--dataset_dir', type=str, help='Path to the dataset directory')
     parser.add_argument('--batch_size', type=int, default=16, help='Batch size for training')
     parser.add_argument('--num_workers', type=int, default=0, help='Number of workers for data loading')
