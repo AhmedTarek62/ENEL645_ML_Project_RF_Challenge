@@ -20,5 +20,7 @@ class SoftDemodLoss(nn.Module):
         soft_target_real = torch.tensor(np.real(soft_target), dtype=torch.float32).to(self.device)
         soft_pred_imag = torch.tensor(np.imag(soft_pred), dtype=torch.float32).to(self.device)
         soft_target_imag = torch.tensor(np.imag(soft_target), dtype=torch.float32).to(self.device)
-        return self.criterion(soft_target_real, soft_pred_real) + self.criterion(soft_target_imag, soft_pred_imag)
+        loss = self.criterion(soft_target_real, soft_pred_real) + self.criterion(soft_target_imag, soft_pred_imag)
+        loss.requires_grad_(True)
+        return loss
 
