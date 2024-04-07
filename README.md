@@ -31,11 +31,52 @@ Test Default_Torch_WaveNet (baseline) model
 ```bash
 # download model weights
 wget -O  reference_models.zip "https://www.dropbox.com/scl/fi/890vztq67krephwyr0whb/reference_models.zip?rlkey=6yct3w8rx183f0l3ok2my6rej&dl=0"
-unzip  reference_models.zip
+unzip  reference_models.zip -d checkpoints
 rm reference_models.zip
 
 # run inference model on QPSK signal and CommSignal2 interference
-python wave_net_inference.py --model_path=torch_models/dataset_qpsk_commsignal2_mixture_wavenet/weights-206000.pt --soi_type=QPSK --batch_size=4 --interference_dir_path=rf_datasets/train_test_set_unmixed/dataset/testset1_frame
+python wave_net_inference.py --model_path=checkpoints/torch_models/dataset_qpsk_commsignal2_mixture_wavenet/weights-206000.pt --soi_type=QPSK --batch_size=4 --interference_dir_path=rf_datasets/train_test_set_unmixed/dataset/testset1_frame
+```
+
+Test all models (as many models as needed but for the following command it tests one model against the baseline. If more models are need change the `--num_models=<int>`. Default is 1)
+```bash
+# =======================================================================================================
+# QPSK signal
+# =======================================================================================================
+# for QPSK + CommSignal2
+echo 'WaveNet
+checkpoints/KUTII_WaveNet_QPSK-39_0.1641622244147584.pt' | python all_models_eval_script.py --baseline_model_path=checkpoints/torchmodels/dataset_qpsk_commsignal2_mixture_wavenet/weights-206000.pt --interference_dir_path=rf_datasets/train_test_set_unmixed/dataset/testset1_frame
+
+# for QPSK + CommSignal3
+echo 'WaveNet
+checkpoints/KUTII_WaveNet_QPSK-39_0.1641622244147584.pt' | python all_models_eval_script.py --baseline_model_path=checkpoints/torchmodels/dataset_qpsk_commsignal3_mixture_wavenet/weights-206000.pt --interference_type=CommSignal3 --interference_dir_path=rf_datasets/train_test_set_unmixed/dataset/testset1_frame
+
+# for QPSK + CommSignal5G1
+echo 'WaveNet
+checkpoints/KUTII_WaveNet_QPSK-39_0.1641622244147584.pt' | python all_models_eval_script.py --baseline_model_path=checkpoints/torchmodels/dataset_qpsk_commsignal5g1_mixture_wavenet/weights-276000.pt --interference_type=CommSignal5G1 --interference_dir_path=rf_datasets/train_test_set_unmixed/dataset/testset1_frame
+
+# for QPSK + EMISignal1
+echo 'WaveNet
+checkpoints/KUTII_WaveNet_QPSK-39_0.1641622244147584.pt' | python all_models_eval_script.py --baseline_model_path=checkpoints/torchmodels/dataset_qpsk_emisignal1_mixture_wavenet/weights-278000.pt --interference_type=EMISignal1 --interference_dir_path=rf_datasets/train_test_set_unmixed/dataset/testset1_frame
+
+# =======================================================================================================
+# QPSK_OFDM signal
+# =======================================================================================================
+# for QPSP_OFDM + CommSignal2
+echo 'WaveNet
+checkpoints/KUTII_WaveNet_QPSK_OFDM-46_0.17864021386019885.pt' | python all_models_eval_script.py --baseline_model_path=checkpoints/torchmodels/dataset_ofdmqpsk_commsignal2_mixture_wavenet/weights-204000.pt --soi_type=QPSK_OFDM --interference_dir_path=rf_datasets/train_test_set_unmixed/dataset/testset1_frame
+
+# for QPSP_OFDM + CommSignal3
+echo 'WaveNet
+checkpoints/KUTII_WaveNet_QPSK_OFDM-46_0.17864021386019885.pt' | python all_models_eval_script.py --baseline_model_path=checkpoints/torchmodels/dataset_ofdmqpsk_commsignal3_mixture_wavenet/weights-318000.pt --interference_type=CommSignal3 --soi_type=QPSK_OFDM --interference_dir_path=rf_datasets/train_test_set_unmixed/dataset/testset1_frame
+
+# for QPSP_OFDM + CommSignal5G1
+echo 'WaveNet
+checkpoints/KUTII_WaveNet_QPSK_OFDM-46_0.17864021386019885.pt' | python all_models_eval_script.py --baseline_model_path=checkpoints/torchmodels/dataset_ofdmqpsk_commsignal5g1_mixture_wavenet/weights-270000.pt --interference_type=CommSignal5G1 --soi_type=QPSK_OFDM --interference_dir_path=rf_datasets/train_test_set_unmixed/dataset/testset1_frame
+
+# for QPSP_OFDM + EMISignal1
+echo 'WaveNet
+checkpoints/KUTII_WaveNet_QPSK_OFDM-46_0.17864021386019885.pt' | python all_models_eval_script.py --baseline_model_path=checkpoints/torchmodels/dataset_ofdmqpsk_emisignal1_mixture_wavenet/weights-208000.pt --interference_type=EMISignal1 --soi_type=QPSK_OFDM --interference_dir_path=rf_datasets/train_test_set_unmixed/dataset/testset1_frame
 ```
 
 ## Project Files
