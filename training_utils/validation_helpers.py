@@ -6,7 +6,7 @@ from comm_utils import split_to_complex_numpy
 from pathlib import Path
 
 
-def evaluate_epoch(model, dataloader, criterion, device):
+def evaluate_epoch(model, dataloader, criterion, device, input_bits=False):
     model.eval()
     total_loss = 0.0
     batch_size = dataloader.batch_size
@@ -15,8 +15,12 @@ def evaluate_epoch(model, dataloader, criterion, device):
         with tqdm(dataloader, desc='Validation', unit='batch') as pbar:
             for i, sample in enumerate(pbar):
                 sig_mixed, sig_target = sample[0].float().to(device), sample[1].float().to(device)
+                msg_bits = sample[2].float().to(device)
                 sig_pred = model(sig_mixed)
-                loss = criterion(sig_pred, sig_target)
+                if input_bits:
+                    loss = criterion(sig_pred, msg_bits)
+                else:
+                    loss = criterion(sig_pred, sig_target)
 
                 # Update total loss
                 total_loss += loss.item()

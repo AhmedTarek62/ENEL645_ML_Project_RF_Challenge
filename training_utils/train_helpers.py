@@ -3,7 +3,7 @@ import torch
 import os
 
 
-def train_epoch(model, dataloader, criterion, optimizer, device):
+def train_epoch(model, dataloader, criterion, optimizer, device, input_bits=False):
     model.train()
     total_loss = 0.0
     batch_size = dataloader.batch_size
@@ -11,9 +11,13 @@ def train_epoch(model, dataloader, criterion, optimizer, device):
     with tqdm(dataloader, desc='Training', unit='batch') as pbar:
         for i, sample in enumerate(pbar):
             sig_mixed, sig_target = sample[0].float().to(device), sample[1].float().to(device)
+            msg_bits = sample[2].float().to(device)
             optimizer.zero_grad()
             sig_pred = model(sig_mixed)
-            loss = criterion(sig_pred, sig_target)
+            if input_bits:
+                loss = criterion(sig_pred, msg_bits)
+            else:
+                loss = criterion(sig_pred, sig_target)
             loss.backward()
             optimizer.step()
 
