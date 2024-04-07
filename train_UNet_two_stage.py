@@ -51,7 +51,7 @@ def main(args):
 
     demodulator = demodulate_qpsk_signal
     criterion_mse = nn.MSELoss()
-    criterion_ber = BerLoss(demodulator,device)
+    criterion_ber = BerLoss(demodulator, device)
     optimizer = Adam(model.parameters(), lr=5e-3)
     # scheduler = lr_scheduler.StepLR(optimizer, step_size=5)
 

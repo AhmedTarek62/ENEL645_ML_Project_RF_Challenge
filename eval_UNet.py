@@ -58,7 +58,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="UNet Evaluation Script")
     parser.add_argument('--model', type=str, default='GeneralUNet', choices=['GeneralUNet', 'UNet'],
                         help='Model name')
-    parser.add_argument('--preprocess', type=str, options=['standard', 'range', 'none'],
+    parser.add_argument('--preprocess', type=str, choices=['standard', 'range', 'none'],
                         help='Type of preprocessing to use')
     parser.add_argument("--train_dataset_dir", type=str, help="Path to the training dataset directory")
     parser.add_argument("--dataset_dir", type=str, help="Path to the dataset directory")
