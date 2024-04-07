@@ -59,10 +59,10 @@ class UNetBlock(nn.Module):
         super(UNetBlock, self).__init__()
         self.out_channels = out_channels
         self.block = nn.Sequential(
-            nn.Conv1d(in_channels, out_channels, kernel_size, padding=1),
+            nn.Conv1d(in_channels, out_channels, kernel_size, padding='same'),
             nn.BatchNorm1d(out_channels),
             nn.ReLU(inplace=True),
-            nn.Conv1d(out_channels, out_channels, kernel_size, padding=1),
+            nn.Conv1d(out_channels, out_channels, kernel_size, padding='same'),
             nn.BatchNorm1d(out_channels),
             nn.ReLU(inplace=True),
         )
@@ -103,7 +103,7 @@ class GeneralUNet(nn.Module):
         self.max_unpool_1d = nn.MaxUnpool1d(kernel_size=2, stride=2)
 
         # output layer
-        self.out_conv = nn.Conv1d(in_channels=32, out_channels=in_channels, kernel_size=kernel_size, padding=1)
+        self.out_conv = nn.Conv1d(in_channels=32, out_channels=in_channels, kernel_size=kernel_size, padding="same")
 
     def forward(self, x):
         # encoder pass
