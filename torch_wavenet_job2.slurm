@@ -1,11 +1,10 @@
 #!/bin/bash
 #==============================================
 #SBATCH --partition=gpu-a100
-#SBATCH --time=0:40:00
+#SBATCH --time=12:00:00
 #SBATCH --gres=gpu:1
 #SBATCH --nodes=1
 #SBATCH --mem=100G
-#SBATCH --cpus-per-task=4
 #SBATCH --job-name=sigsep
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=ogechukwukanu@gmail.com
@@ -15,4 +14,4 @@ source ~/software/init-conda
 
 conda activate rfchallenge
 
-python KUTII_WaveNet_eval_script.py --soi_type=QPSK --batch_size=8 --ckpt_path=checkpoints/KUTII_WaveNet_QPSK-18_0.16417680439073593.pt
+python KUTII_WaveNet_trainer_script.py --epoch=50 --batch_size=8 --soi_type=QPSK_OFDM --dataset_dir=rf_datasets/test_set_mixed/datasets/eval_QPSK_OFDM_20240406_152146

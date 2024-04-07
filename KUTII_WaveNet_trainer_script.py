@@ -7,9 +7,12 @@ import os
 import torch
 from dataset_utils import generate_train_mixture
 from dataset_utils import SigSepDataset
+from data_manipulation_utils import StandardScaler
 from torch.utils.data import DataLoader
 from models import WaveNet
 from tqdm import tqdm
+
+import numpy as np
 
 import wandb
 
@@ -65,14 +68,26 @@ def main(**kwargs):
     print(f"\n\nUsing device: {device}")
 
     # load and split the dataset
-    filepaths_list = [os.path.join(dataset_path, batch_file)
-                      for batch_file in os.listdir(dataset_path)]
-    dataset = SigSepDataset(filepaths_list, dtype="real")
-    total_samples = len(dataset)
-    train_samples = int(0.8 * total_samples)
-    val_samples = total_samples - train_samples
-    train_dataset, val_dataset = torch.utils.data.random_split(
-        dataset, [train_samples, val_samples])
+    if not kwargs["preprocess"]:
+        filepaths_list = [os.path.join(dataset_path, batch_file)
+                        for batch_file in os.listdir(dataset_path)]
+        dataset = SigSepDataset(filepaths_list, dtype="real")
+        total_samples = len(dataset)
+        train_samples = int(0.8 * total_samples)
+        val_samples = total_samples - train_samples
+        train_dataset, val_dataset = torch.utils.data.random_split(
+            dataset, [train_samples, val_samples])
+    else:
+        filepaths_list = [os.path.join(dataset_path, batch_file)
+                            for batch_file in os.listdir(dataset_path)]
+        np.random.shuffle(filepaths_list)
+        train_size = int(0.8 * len(filepaths_list))
+        train_filepaths_list = filepaths_list[:train_size]
+        standard_scaler = StandardScaler(train_filepaths_list)
+        standard_scaler.fit()
+        train_dataset = SigSepDataset(train_filepaths_list, standard_scaler, dtype='real')
+        val_dataset = SigSepDataset(filepaths_list[train_size:], standard_scaler, dtype='real')
+
     train_loader = DataLoader(
         train_dataset, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(
@@ -125,17 +140,19 @@ def main(**kwargs):
             max_best_val_loss = max(best_val_loss)
             idx = best_val_loss.index(max_best_val_loss)
             best_val_loss[idx] = avg_vloss
+            best_model_path = f"checkpoints/KUTII_WaveNet_{kwargs['soi_type']}-{epoch+1}_{avg_vloss}.pt"
             torch.save({"model_state_dict": model.state_dict(),
-                        "model_params": model_params},
-                       f"checkpoints/KUTII_WaveNet_{kwargs['soi_type']}-{epoch+1}_{avg_vloss}.pt")
-            print(f"Model saved at checkpoints/model_{epoch+1}_{avg_vloss}.pt")
+                        "model_params": model_params}, best_model_path)
+            print(f"Model saved at {best_model_path}")
 
             for file in os.listdir("checkpoints"):
-                if file.endswith(f"vloss_{max_best_val_loss}.pt"):
+                if file.endswith(f"_{max_best_val_loss}.pt"):
                     os.remove(f"checkpoints/{file}")
 
         scheduler.step()
-
+    wandb.config.update({
+        "best_model_path": best_model_path
+    })
     run.finish()
 
 
@@ -146,6 +163,7 @@ if __name__ == '__main__':
                         help="Type of signal of interest (QPSK/QPSK_OFDM)")
     parser.add_argument('--epochs', type=int, default=10)
     parser.add_argument('--batch_size', type=int, default=8)
+    parser.add_argument('--preprocess', type=str, default=None)
     parser.add_argument('--num_batches', type=int, default=1000)
     parser.add_argument('--lr', type=float, default=1e-3)
     parser.add_argument("--optimizer", type=str, default="adamw",

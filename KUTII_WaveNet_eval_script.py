@@ -7,7 +7,7 @@ from dataset_utils import SigSepDataset
 from dataset_utils import generate_competition_eval_mixture
 from torch.utils.data import DataLoader
 from training_utils import visualize_results
-from eval_utils import evaluation_and_results, plot_competition_figures
+from eval_utils import evaluate_competition, evaluation_and_results, plot_competition_figures
 
 
 import argparse

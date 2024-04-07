@@ -10,3 +10,4 @@ slurm-*.out
 venv
 checkpoints
 wandb
+.vscode

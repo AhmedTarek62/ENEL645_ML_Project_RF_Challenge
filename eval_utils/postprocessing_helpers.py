@@ -133,6 +133,7 @@ def evaluation_and_results(model, dataloader, soi_type, device, model_name):
         axes_ber[rows[i], cols[i]].semilogy(*get_smoothed(sinr_all, ber_no_mitigation, 11), "o--", linewidth=3, label="No Mitigation")
         ber_est = eval_metrics[intrf_type]["ber_est"]
         axes_ber[rows[i], cols[i]].semilogy(*get_smoothed(sinr_all, ber_est, 11), "o--", linewidth=3, label=model_name)
+        axes_ber[rows[i], cols[i]].plot(*get_smoothed(sinr_all, 10**-2 * np.ones(sinr_all.shape[0]), 11), "o", color="grey", markersize=2)
         axes_ber[rows[i], cols[i]].set_title(f"{soi_type}_{intrf_type}", fontsize=14)
         axes_ber[rows[i], cols[i]].grid()
         axes_ber[rows[i], cols[i]].set_xlabel('SINR (dB)', fontsize=12)
@@ -152,6 +153,195 @@ def evaluation_and_results(model, dataloader, soi_type, device, model_name):
     fig_mse.savefig(mse_path, dpi=800, bbox_inches='tight')
     print("MSE figure saved at {}".format(mse_path))
     ber_path = f'figures/{soi_type}_{model_name}_competition_ber.png'
+    fig_ber.savefig(ber_path, dpi=800, bbox_inches='tight')
+    print("BER figure saved at {}".format(ber_path))
+
+def evaluation_and_results2(models, dataloader, soi_type, interference_type, device, model_names):
+    if interference_type == 'all':
+        intrf_signal_set2 = intrf_signal_set
+    else:
+        intrf_signal_set2 = [interference_type]
+
+    model_names = ["No Mitigation"] + list(model_names)
+    models = [None] + list(models)
+
+    results = {
+        key: {
+            key2: {
+                'sinr_all': [],
+                'soi_target_all': [],
+                'soi_est_all': [],
+                'msg_bits_all': [],
+            } for key2 in intrf_signal_set2
+        } for key in model_names
+    }
+
+    for i, (soi_mix, soi_target, msg_bits, intrf_type, sinr) in enumerate(tqdm(dataloader, desc="Evaluation", unit="batch")):
+        soi_mix = soi_mix.to(device)
+        for model_name, model in zip(model_names, models):
+            if model_name == "No Mitigation":
+                soi_est = soi_mix
+            else:
+                model.eval()
+                with torch.no_grad():
+                    soi_est = model(soi_mix)
+            if interference_type == "all":
+                for idx, int_type in enumerate(intrf_signal_set2):
+                    results[model_name][int_type]["sinr_all"].extend(
+                        sinr[intrf_type == idx].numpy())
+                    results[model_name][int_type]["soi_target_all"].extend(
+                        soi_target[intrf_type == idx].numpy())
+                    results[model_name][int_type]["soi_est_all"].extend(
+                        soi_est[intrf_type == idx].cpu().numpy())
+                    results[model_name][int_type]["msg_bits_all"].extend(
+                        msg_bits[intrf_type == idx].numpy())
+            else:
+                idx = intrf_signal_set.index(interference_type)
+                results[model_name][interference_type]["sinr_all"].extend(
+                        sinr[intrf_type == idx].numpy())
+                results[model_name][interference_type]["soi_target_all"].extend(
+                    soi_target[intrf_type == idx].numpy())
+                results[model_name][interference_type]["soi_est_all"].extend(
+                    soi_est[intrf_type == idx].cpu().numpy())
+                results[model_name][interference_type]["msg_bits_all"].extend(
+                    msg_bits[intrf_type == idx].numpy())
+
+    for intrf_type in intrf_signal_set2:
+        for model_name in model_names:
+            results[model_name][intrf_type]["sinr_all"] = np.array(
+                results[model_name][intrf_type]["sinr_all"])
+            results[model_name][intrf_type]["soi_target_all"] = np.array(
+                results[model_name][intrf_type]["soi_target_all"])
+            results[model_name][intrf_type]["soi_est_all"] = np.array(
+                results[model_name][intrf_type]["soi_est_all"])
+            results[model_name][intrf_type]["msg_bits_all"] = np.array(
+                results[model_name][intrf_type]["msg_bits_all"])
+
+    # combine IQ channels
+    for intrf_type in intrf_signal_set2:
+        for model_name in model_names:
+            results[model_name][intrf_type]["soi_target_all"] = results[model_name][intrf_type]["soi_target_all"][:, 0, :] + \
+                1j * results[model_name][intrf_type]["soi_target_all"][:, 1, :]
+            results[model_name][intrf_type]["soi_est_all"] = results[model_name][intrf_type]["soi_est_all"][:, 0, :] + \
+                1j * results[model_name][intrf_type]["soi_est_all"][:, 1, :]
+
+    # evaluate the mse and ber
+    eval_metrics = {
+        key: {
+            key2: {
+                'sinr_all': [],
+                'mse_est': [],
+                'ber_est': []
+            } for key2 in intrf_signal_set2
+        } for key in model_names
+    }
+
+    for intrf_type in intrf_signal_set2:
+        for model_name in model_names:
+            y = results[model_name][intrf_type]["soi_target_all"]
+            yhat = results[model_name][intrf_type]["soi_est_all"]
+            eval_metrics[model_name][intrf_type]["mse_est"] = get_mse(y, yhat)
+
+            # demodulate the signals
+            b = results[model_name][intrf_type]["msg_bits_all"]
+            if soi_type == "QPSK":
+                bhat, _ = qpsk_helper.demodulate_qpsk_signal(
+                    results[model_name][intrf_type]["soi_est_all"])
+            elif soi_type == "QPSK_OFDM":
+                resource_grid = ofdm_helper.create_resource_grid(40960//80)
+                bhat, _ = ofdm_helper.demodulate_ofdm_signal(
+                    results[model_name][intrf_type]["soi_est_all"], resource_grid)
+            eval_metrics[model_name][intrf_type]["ber_est"] = get_ber(b, bhat)
+
+            # save the sinr
+            eval_metrics[model_name][intrf_type]["sinr_all"] = results[model_name][intrf_type]["sinr_all"]
+
+    os.makedirs("figures", exist_ok=True)
+    nmodels = len(model_names)
+    if interference_type == 'all':
+        fig_mse, axes_mse = plt.subplots(2, 2, figsize=(10, 8))
+        fig_ber, axes_ber = plt.subplots(2, 2, figsize=(10, 8))
+        rows = [0, 0, 1, 1]
+        cols = [0, 1, 0, 1]
+        for i, intrf_type in enumerate(intrf_signal_set2):
+            for model_name in model_names:
+                # plot MSE
+                sinr_all = eval_metrics[model_name][intrf_type]["sinr_all"]
+                mse_est = eval_metrics[model_name][intrf_type]["mse_est"]
+                axes_mse[rows[i], cols[i]].semilogy(
+                    *get_smoothed(sinr_all, mse_est, 11), "o--", linewidth=3, label=model_name)
+                axes_mse[rows[i], cols[i]].set_title(
+                    f"{soi_type}_{intrf_type}", fontsize=14)
+                axes_mse[rows[i], cols[i]].grid()
+                axes_mse[rows[i], cols[i]].set_xlabel('SINR (dB)', fontsize=12)
+                if cols[i] == 0:
+                    axes_mse[rows[i], cols[i]].set_ylabel(
+                        'Mean Squared Error', fontsize=12)
+                axes_mse[rows[i], cols[i]].tick_params(axis='x', labelsize=10)
+                axes_mse[rows[i], cols[i]].tick_params(axis='y', labelsize=10)
+
+                # plot BER
+                ber_est = eval_metrics[model_name][intrf_type]["ber_est"]
+                axes_ber[rows[i], cols[i]].semilogy(
+                    *get_smoothed(sinr_all, ber_est, 11), "o--", linewidth=3, label=model_name)
+                axes_ber[rows[i], cols[i]].set_title(
+                    f"{soi_type}_{intrf_type}", fontsize=14)
+                axes_ber[rows[i], cols[i]].grid()
+                axes_ber[rows[i], cols[i]].set_xlabel('SINR (dB)', fontsize=12)
+                if cols[i] == 0:
+                    axes_ber[rows[i], cols[i]].set_ylabel(
+                        'Bit Error Rate', fontsize=12)
+                axes_ber[rows[i], cols[i]].tick_params(axis='x', labelsize=10)
+                axes_ber[rows[i], cols[i]].tick_params(axis='y', labelsize=10)
+
+        fig_mse.subplots_adjust(hspace=0.75)
+        fig_mse.legend(loc='upper center', bbox_to_anchor=(0.5, 1), fancybox=True, shadow=True, ncol=nmodels,
+                    labels=model_names, fontsize=14)
+        fig_ber.subplots_adjust(hspace=0.75)
+        fig_ber.legend(loc='upper center', bbox_to_anchor=(0.5, 1), fancybox=True, shadow=True, ncol=nmodels,
+                    labels=model_names, fontsize=14)
+    else:
+        fig_mse, axes_mse = plt.subplots(1, 1, figsize=(5, 5))
+        fig_ber, axes_ber = plt.subplots(1, 1, figsize=(5, 5))
+
+        for model_name in model_names:
+            # plot MSE
+            sinr_all = eval_metrics[model_name][interference_type]["sinr_all"]
+            mse_est = eval_metrics[model_name][interference_type]["mse_est"]
+            axes_mse.semilogy(
+                *get_smoothed(sinr_all, mse_est, 11), "o--", linewidth=3, label=model_name)
+            axes_mse.set_title(
+                f"{soi_type}_{interference_type}", fontsize=14)
+            axes_mse.grid()
+            axes_mse.set_xlabel('SINR (dB)', fontsize=12)
+            axes_mse.set_ylabel('Mean Squared Error', fontsize=12)
+            axes_mse.tick_params(axis='x', labelsize=10)
+            axes_mse.tick_params(axis='y', labelsize=10)
+
+            # plot BER
+            ber_est = eval_metrics[model_name][interference_type]["ber_est"]
+            axes_ber.semilogy(
+                *get_smoothed(sinr_all, ber_est, 11), "o--", linewidth=3, label=model_name)
+            axes_ber.plot(*get_smoothed(sinr_all, 10**-2 * np.ones(sinr_all.shape[0]), 11),
+                          "o", color="grey", markersize=2, label=None)
+            axes_ber.set_title(
+                f"{soi_type}_{interference_type}", fontsize=14)
+            axes_ber.grid()
+            axes_ber.set_xlabel('SINR (dB)', fontsize=12)
+            axes_ber.set_ylabel('Bit Error Rate', fontsize=12)
+            axes_ber.tick_params(axis='x', labelsize=10)
+            axes_ber.tick_params(axis='y', labelsize=10)
+
+        fig_mse.subplots_adjust(hspace=1.05)
+        fig_mse.legend(loc='upper center', labels=model_names, bbox_to_anchor=(0.5, 1), ncols=nmodels, fancybox=True, shadow=True, fontsize=10)
+        fig_ber.subplots_adjust(hspace=1.05)
+        fig_ber.legend(loc='upper center', bbox_to_anchor=(0.5, 1), ncols=nmodels, fancybox=True, shadow=True, fontsize=10)
+    
+    # Save the figures
+    mse_path = f'figures/{soi_type}_{interference_type}_competition_mse.png'
+    fig_mse.savefig(mse_path, dpi=800, bbox_inches='tight')
+    print("MSE figure saved at {}".format(mse_path))
+    ber_path = f'figures/{soi_type}_{interference_type}_competition_ber.png'
     fig_ber.savefig(ber_path, dpi=800, bbox_inches='tight')
     print("BER figure saved at {}".format(ber_path))
 

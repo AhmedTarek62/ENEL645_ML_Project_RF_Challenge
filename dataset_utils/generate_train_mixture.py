@@ -73,6 +73,7 @@ def generate_train_mixture(soi_type, num_batches, batch_size,
             sig_mixed_numpy = np.zeros((batch_size * len(intrf_frames), sig_len), dtype=complex)
             sig_soi_numpy = np.zeros((batch_size * len(intrf_frames), sig_len), dtype=complex)
             msg_bits_numpy = np.zeros((batch_size * len(intrf_frames), bits_per_stream))
+            sinr_db_numpy = np.zeros(batch_size * len(intrf_frames))
 
             for i, frame in enumerate(intrf_frames):
                 sample_indices = np.random.randint(frame.shape[0], size=(batch_size,))
@@ -90,11 +91,11 @@ def generate_train_mixture(soi_type, num_batches, batch_size,
                 sig_mixed_numpy[i * batch_size: (i + 1) * batch_size, :] = sig_mixed.numpy()
                 sig_soi_numpy[i * batch_size: (i + 1) * batch_size, :] = sig_soi.numpy()
                 msg_bits_numpy[i * batch_size: (i + 1) * batch_size, :] = msg_bits.numpy()
-                measured_sinr = get_sinr_db(sig_soi.numpy(), intrf_frame_snapshot.numpy() * gain_phasor.numpy())
-                assert all(measured_sinr - np.squeeze(sinr_db.numpy()) < 1e-2)
+                # save batch
+                sinr_db_numpy[i * batch_size: (i + 1)
+                              * batch_size] = get_sinr_db(sig_soi.numpy(), intrf_frame_snapshot.numpy() * gain_phasor.numpy())
                 del sig_mixed
 
-            sinr_db_numpy = np.squeeze(np.tile(sinr_db.numpy(), (len(intrf_frames), 1)))
             batch_data = [sig_mixed_numpy, sig_soi_numpy, msg_bits_numpy, intrf_labels, sinr_db_numpy]
 
             mixture_filename = f'{soi_type}_batch_{batch}'

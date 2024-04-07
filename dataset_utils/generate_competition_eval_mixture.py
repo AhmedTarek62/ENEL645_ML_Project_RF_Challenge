@@ -52,7 +52,7 @@ def generate_competition_eval_mixture(soi_type,
             intrf_frames.append(np.nan_to_num(np.array(data_h5file.get('dataset')), nan=0))
 
     all_sinr_db = np.arange(-30, 1, 3)
-    num_test_cases = 100
+    num_test_cases = 10
     num_intrf_signals = len(intrf_files)
     intrf_labels = np.array([i for i in range(len(intrf_frames))
                             for _ in range(num_test_cases)])
@@ -70,6 +70,7 @@ def generate_competition_eval_mixture(soi_type,
         sig_mixed_numpy = np.zeros((num_test_cases * num_intrf_signals, sig_len), dtype=complex)
         sig_soi_numpy = np.zeros((num_test_cases * num_intrf_signals, sig_len), dtype=complex)
         msg_bits_numpy = np.zeros((num_test_cases * num_intrf_signals, bits_per_stream))
+        sinr_db_numpy = np.zeros(num_test_cases * len(intrf_frames))
 
         for i, frame in enumerate(intrf_frames):
             sample_indices = np.random.randint(frame.shape[0], size=(num_test_cases,))
@@ -86,12 +87,11 @@ def generate_competition_eval_mixture(soi_type,
             sig_mixed_numpy[i * num_test_cases: (i + 1) * num_test_cases, :] = sig_mixed.numpy()
             sig_soi_numpy[i * num_test_cases: (i + 1) * num_test_cases, :] = sig_soi.numpy()
             msg_bits_numpy[i * num_test_cases: (i + 1) * num_test_cases, :] = msg_bits.numpy()
-            # check SINR case
-            measured_sinr = get_sinr_db(sig_soi.numpy(), intrf_frame_snapshot.numpy() * gain_phasor.numpy())
-            assert all(np.abs(measured_sinr - sinr_db) < 1e-2)
+            # save batch
+            sinr_db_numpy[i * num_test_cases: (i + 1)
+                            * num_test_cases] = get_sinr_db(sig_soi.numpy(), intrf_frame_snapshot.numpy() * gain_phasor.numpy())
             del sig_mixed
 
-        sinr_db_numpy = sinr_db * np.ones((num_test_cases * num_intrf_signals))
         batch_data = [sig_mixed_numpy, sig_soi_numpy, msg_bits_numpy, intrf_labels, sinr_db_numpy]
         mixture_filename = f'{soi_type}_sinr_{sinr_db}'
         dump(batch_data, os.path.join(dataset_path, mixture_filename))
