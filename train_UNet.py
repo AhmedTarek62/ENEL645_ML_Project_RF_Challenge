@@ -2,7 +2,8 @@ import argparse
 from models import GeneralUNet, UNet
 from dataset_utils import SigSepDataset
 from torch.utils.data import DataLoader
-from training_utils import train_epoch, evaluate_epoch, save_checkpoint, visualize_results
+from training_utils import train_epoch, evaluate_epoch, save_checkpoint, visualize_results, SoftDemodLoss
+from comm_utils import demodulate_qpsk_signal
 from data_manipulation_utils import StandardScaler, RangeScaler
 from torch import nn
 from torch.optim import Adam, lr_scheduler
@@ -45,8 +46,11 @@ def main(args):
         model = GeneralUNet()
     else:
         raise NotImplementedError
+
     model = model.to(device)
-    criterion = nn.MSELoss()
+    # criterion = nn.MSELoss()
+    demodulator = demodulate_qpsk_signal
+    criterion = SoftDemodLoss(demodulator, device)
     optimizer = Adam(model.parameters(), lr=5e-3)
     # scheduler = lr_scheduler.StepLR(optimizer, step_size=5)
 

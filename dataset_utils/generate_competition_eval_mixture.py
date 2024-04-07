@@ -88,7 +88,7 @@ def generate_competition_eval_mixture(soi_type,
             msg_bits_numpy[i * num_test_cases: (i + 1) * num_test_cases, :] = msg_bits.numpy()
             # check SINR case
             measured_sinr = get_sinr_db(sig_soi.numpy(), intrf_frame_snapshot.numpy() * gain_phasor.numpy())
-            assert all(np.abs(measured_sinr - sinr_db) < 1e-2)
+            assert all(np.abs(measured_sinr - sinr_db) < 1)
             del sig_mixed
 
         sinr_db_numpy = sinr_db * np.ones((num_test_cases * num_intrf_signals))

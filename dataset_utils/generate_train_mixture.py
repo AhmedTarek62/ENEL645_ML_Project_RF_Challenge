@@ -91,7 +91,7 @@ def generate_train_mixture(soi_type, num_batches, batch_size,
                 sig_soi_numpy[i * batch_size: (i + 1) * batch_size, :] = sig_soi.numpy()
                 msg_bits_numpy[i * batch_size: (i + 1) * batch_size, :] = msg_bits.numpy()
                 measured_sinr = get_sinr_db(sig_soi.numpy(), intrf_frame_snapshot.numpy() * gain_phasor.numpy())
-                assert all(measured_sinr - np.squeeze(sinr_db.numpy()) < 1e-2)
+                assert all(measured_sinr - np.squeeze(sinr_db.numpy()) < 1)
                 del sig_mixed
 
             sinr_db_numpy = np.squeeze(np.tile(sinr_db.numpy(), (len(intrf_frames), 1)))

@@ -2,20 +2,24 @@ import argparse
 from models import GeneralUNet, UNet
 from dataset_utils import SigSepDataset
 from torch.utils.data import DataLoader
-from training_utils import train_epoch, evaluate_epoch, save_checkpoint, visualize_results, BerLoss, SoftDemodLoss
-from data_manipulation_utils import StandardScaler, RangeScaler
+from training_utils import train_epoch, evaluate_epoch, save_checkpoint, visualize_results, SoftDemodLoss
 from comm_utils import demodulate_qpsk_signal
+from data_manipulation_utils import StandardScaler, RangeScaler
 from torch import nn
 from torch.optim import Adam, lr_scheduler
 import torch
 import os
 from pathlib import Path
+import random
 
 
 def main(args):
     # Load development dataset files
-    dataset_dir = Path(args.dataset_dir)
-    filepaths_list = [os.path.join(dataset_dir, batch_file) for batch_file in os.listdir(dataset_dir)]
+    qpsk_dataset_dir = Path(args.qpsk_dataset_dir)
+    ofdm_dataset_dir = Path(args.ofdm_dataset_dir)
+    filepaths_list = [os.path.join(qpsk_dataset_dir, batch_file) for batch_file in os.listdir(qpsk_dataset_dir)]
+    filepaths_list.extend([os.path.join(ofdm_dataset_dir, batch_file) for batch_file in os.listdir(ofdm_dataset_dir)])
+    random.shuffle(filepaths_list)
 
     # Split into train and validation
     train_val_split = 0.8
@@ -39,7 +43,6 @@ def main(args):
     val_loader = DataLoader(val_set, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers)
 
     # Initialize UNet model
-
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
     if args.model == 'UNet':
         model = UNet()
@@ -47,11 +50,11 @@ def main(args):
         model = GeneralUNet()
     else:
         raise NotImplementedError
-    model = model.to(device)
 
+    model = model.to(device)
+    # criterion = nn.MSELoss()
     demodulator = demodulate_qpsk_signal
-    criterion_mse = nn.MSELoss()
-    criterion_soft_demod = SoftDemodLoss(demodulator, device)
+    criterion = SoftDemodLoss(demodulator, device)
     optimizer = Adam(model.parameters(), lr=5e-3)
     # scheduler = lr_scheduler.StepLR(optimizer, step_size=5)
 
@@ -65,15 +68,8 @@ def main(args):
     os.makedirs(os.path.join(checkpoint_dir, 'figures'), exist_ok=True)
 
     for epoch in range(num_epochs):
-        if epoch > num_epochs // 2:
-            criterion = criterion_mse
-            input_bits = False
-        else:
-            criterion = criterion_soft_demod
-            input_bits = False
-
-        train_loss = train_epoch(model, train_loader, criterion, optimizer, device, input_bits=input_bits)
-        val_loss = evaluate_epoch(model, val_loader, criterion, device, input_bits=input_bits)
+        train_loss = train_epoch(model, train_loader, criterion, optimizer, device)
+        val_loss = evaluate_epoch(model, val_loader, criterion, device)
         print(f"Epoch {epoch + 1}/{num_epochs}, Training Loss: {round(train_loss, 4)}, "
               f"Validation Loss: {round(val_loss, 4)}")
         visualize_results(model, val_loader, device, epoch + 1)
@@ -90,7 +86,8 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Train general UNet model on a dataset')
     parser.add_argument('--model', type=str, default='GeneralUNet', choices=['GeneralUNet', 'UNet'], help='Model name')
-    parser.add_argument('--dataset_dir', type=str, help='Path to the dataset directory')
+    parser.add_argument('--qpsk_dataset_dir', type=str, help='Path to QPSK dataset directory')
+    parser.add_argument('--ofdm_dataset_dir', type=str, help='Path to OFDM dataset directory')
     parser.add_argument('--preprocess', type=str, default='none', choices=['standard', 'range', 'none'],
                         help='Type of preprocessing to use')
     parser.add_argument('--batch_size', type=int, default=16, help='Batch size for training')
