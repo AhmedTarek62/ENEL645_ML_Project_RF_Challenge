@@ -45,7 +45,7 @@ def visualize_results(model, dataloader, device, epoch, num_samples=3, save=True
         axs[2].set_xlabel('timestep')
         plt.tight_layout()
         if save:
-            plt.savefig(Path(f'checkpoints/figures/epoch_{epoch}_{i}.png'))
+            plt.savefig(Path(f'checkpoints/figures/epoch_{epoch}_sample_{i}.png'))
         plt.show()
         plt.close()
 

@@ -2,7 +2,7 @@ import argparse
 from models import GeneralUNet, UNet
 from dataset_utils import SigSepDataset
 from torch.utils.data import DataLoader
-from training_utils import train_epoch, evaluate_epoch, save_checkpoint, visualize_results, BerLoss
+from training_utils import train_epoch, evaluate_epoch, save_checkpoint, visualize_results, BerLoss, SoftDemodLoss
 from data_manipulation_utils import StandardScaler, RangeScaler
 from comm_utils import demodulate_qpsk_signal
 from torch import nn
@@ -51,7 +51,7 @@ def main(args):
 
     demodulator = demodulate_qpsk_signal
     criterion_mse = nn.MSELoss()
-    criterion_ber = BerLoss(demodulator, device)
+    criterion_soft_demod = SoftDemodLoss(demodulator, device)
     optimizer = Adam(model.parameters(), lr=5e-3)
     # scheduler = lr_scheduler.StepLR(optimizer, step_size=5)
 
@@ -65,12 +65,12 @@ def main(args):
     os.makedirs(os.path.join(checkpoint_dir, 'figures'), exist_ok=True)
 
     for epoch in range(num_epochs):
-        if epoch < num_epochs // 2:
+        if epoch > num_epochs // 2:
             criterion = criterion_mse
             input_bits = False
         else:
-            criterion = criterion_ber
-            input_bits = True
+            criterion = criterion_soft_demod
+            input_bits = False
 
         train_loss = train_epoch(model, train_loader, criterion, optimizer, device, input_bits=input_bits)
         val_loss = evaluate_epoch(model, val_loader, criterion, device, input_bits=input_bits)
