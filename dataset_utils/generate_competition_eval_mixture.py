@@ -53,7 +53,7 @@ def generate_competition_eval_mixture(soi_type,
                 np.array(data_h5file.get('dataset')), nan=0))
 
     all_sinr_db = np.arange(-30, 1, 3)
-    num_test_cases = 100
+    num_test_cases = 10
     num_intrf_signals = len(intrf_files)
     intrf_labels = np.array([i for i in range(len(intrf_frames))
                             for _ in range(num_test_cases)])
@@ -102,7 +102,6 @@ def generate_competition_eval_mixture(soi_type,
                             * num_test_cases] = get_sinr_db(sig_soi.numpy(), intrf_frame_snapshot.numpy() * gain_phasor.numpy())
             del sig_mixed
 
-        sinr_db_numpy = sinr_db * np.ones((num_test_cases * num_intrf_signals))
         batch_data = [sig_mixed_numpy, sig_soi_numpy, msg_bits_numpy, intrf_labels, sinr_db_numpy]
         mixture_filename = f'{soi_type}_sinr_{sinr_db}'
         dump(batch_data, os.path.join(dataset_path, mixture_filename))
