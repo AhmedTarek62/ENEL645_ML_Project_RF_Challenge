@@ -53,7 +53,7 @@ def generate_competition_eval_mixture(soi_type,
                 np.array(data_h5file.get('dataset')), nan=0))
 
     all_sinr_db = np.arange(-30, 1, 3)
-    num_test_cases = 10
+    num_test_cases = 100
     num_intrf_signals = len(intrf_files)
     intrf_labels = np.array([i for i in range(len(intrf_frames))
                             for _ in range(num_test_cases)])
@@ -78,9 +78,11 @@ def generate_competition_eval_mixture(soi_type,
         sinr_db_numpy = np.zeros(num_test_cases * len(intrf_frames))
 
         for i, frame in enumerate(intrf_frames):
-            sample_indices = np.random.randint(frame.shape[0], size=(num_test_cases,))
+            sample_indices = np.random.randint(
+                frame.shape[0], size=(num_test_cases,))
             frame = frame[sample_indices, :]
-            snapshot_start_idx = np.random.randint(frame.shape[1] - sig_len, size=frame.shape[0])
+            snapshot_start_idx = np.random.randint(
+                frame.shape[1] - sig_len, size=frame.shape[0])
             snapshot_indices = tf.cast(snapshot_start_idx.reshape(-1, 1)
                                        + np.arange(sig_len).reshape(1, -1), tf.int32)
             intrf_frame_snapshot = tf.experimental.numpy.take_along_axis(
@@ -102,7 +104,8 @@ def generate_competition_eval_mixture(soi_type,
                             * num_test_cases] = get_sinr_db(sig_soi.numpy(), intrf_frame_snapshot.numpy() * gain_phasor.numpy())
             del sig_mixed
 
-        batch_data = [sig_mixed_numpy, sig_soi_numpy, msg_bits_numpy, intrf_labels, sinr_db_numpy]
+        batch_data = [sig_mixed_numpy, sig_soi_numpy,
+                      msg_bits_numpy, intrf_labels, sinr_db_numpy]
         mixture_filename = f'{soi_type}_sinr_{sinr_db}'
         dump(batch_data, os.path.join(dataset_path, mixture_filename))
 

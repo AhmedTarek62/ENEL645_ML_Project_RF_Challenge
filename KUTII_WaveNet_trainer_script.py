@@ -101,7 +101,7 @@ def main(**kwargs):
         "input_channels": 2,
         "residual_channels": 256,
         "residual_layers": 30,
-        "dilation_cycle_length": 20
+        "dilation_cycle_length": 10
     }
 
     model = WaveNet(**model_params).to(device)
