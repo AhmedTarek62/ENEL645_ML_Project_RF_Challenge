@@ -50,12 +50,15 @@ def main(train_dataset_dir, dataset_dir, checkpoint_path, batch_size, num_worker
     model = model.to(device)
     visualize_results(model, test_loader, device, "", 10)
     intrf_sig_names, all_sinr_db, ber, mse_loss = evaluate_competition_faster([model,], test_loader,
-                                                                              'QPSK', device)
-    plot_competition_figures(intrf_sig_names, all_sinr_db, mse_loss[0], mse_loss[1], ber[0], ber[1], 'QPSK', prefix=args.prefix)
+                                                                              args.soi_type, device)
+    plot_competition_figures(intrf_sig_names, all_sinr_db, mse_loss[0], mse_loss[1], ber[0], ber[1], args.soi_type,
+                             prefix=args.prefix)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="UNet Evaluation Script")
+    parser.add_argument('--soi_type', type=str, choices=['QPSK', 'QPSK_OFDM'], default='QPSK',
+                        help="Type of signal to evaluate")
     parser.add_argument('--model', type=str, default='GeneralUNet', choices=['GeneralUNet', 'UNet'],
                         help='Model name')
     parser.add_argument('--preprocess', type=str, choices=['standard', 'range', 'none'],
