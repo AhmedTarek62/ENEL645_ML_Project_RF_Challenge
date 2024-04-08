@@ -7,7 +7,7 @@ and generates the competition evaluation results
 import torch
 from omegaconf import OmegaConf
 from src.DefaultTorchWaveNet import Wave
-from models import UNet, WaveNet
+from models import GeneralUNet, WaveNet
 from dataset_utils import generate_competition_eval_mixture
 from dataset_utils import SigSepDataset
 from eval_utils import evaluation_and_results2
@@ -67,7 +67,7 @@ def main():
         wavenet_model_path = input("Enter the path to the WaveNet model: ")
         # Load the models
         loaded_path = torch.load(unet_model_path)
-        model_unet = UNet().to(device)
+        model_unet = GeneralUNet().to(device)
         model_unet.load_state_dict(loaded_path.get(
             'model_state_dict', loaded_path.get('state_dict', loaded_path)))
         model_list.append({
@@ -94,7 +94,7 @@ def main():
             unet_model_path = input("Enter the path to the UNet model: ")
             # Load the model
             loaded_path = torch.load(unet_model_path)
-            model_unet = UNet().to(device)
+            model_unet = GeneralUNet().to(device)
             model_unet.load_state_dict(loaded_path.get(
                 'model_state_dict', loaded_path.get('state_dict', loaded_path)))
             model_list.append({

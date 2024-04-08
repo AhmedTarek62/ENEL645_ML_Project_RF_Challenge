@@ -14,4 +14,4 @@ source ~/software/init-conda
 
 conda activate rfchallenge
 
-python KUTII_WaveNet_trainer_script.py --epoch=50 --batch_size=8 --soi_type=QPSK_OFDM --dataset_dir=rf_datasets/test_set_mixed/datasets/eval_QPSK_OFDM_20240406_152146
+python KUTII_WaveNet_trainer_script.py --epoch=50 --batch_size=8 --loss=softdemod --soi_type=QPSK_OFDM

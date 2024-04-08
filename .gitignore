@@ -11,3 +11,5 @@ venv
 checkpoints
 wandb
 .vscode
+figures*
+outputs*

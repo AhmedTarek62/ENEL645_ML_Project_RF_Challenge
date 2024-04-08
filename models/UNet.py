@@ -59,10 +59,10 @@ class UNetBlock(nn.Module):
         super(UNetBlock, self).__init__()
         self.out_channels = out_channels
         self.block = nn.Sequential(
-            nn.Conv1d(in_channels, out_channels, kernel_size, padding=1),
+            nn.Conv1d(in_channels, out_channels, kernel_size, padding='same'),
             nn.BatchNorm1d(out_channels),
             nn.ReLU(inplace=True),
-            nn.Conv1d(out_channels, out_channels, kernel_size, padding=1),
+            nn.Conv1d(out_channels, out_channels, kernel_size, padding='same'),
             nn.BatchNorm1d(out_channels),
             nn.ReLU(inplace=True),
         )
@@ -77,25 +77,33 @@ class GeneralUNet(nn.Module):
 
         # encoder
         self.encoder_blocks = nn.ModuleList([
-            UNetBlock(in_channels=in_channels, out_channels=32, kernel_size=kernel_size),
-            UNetBlock(in_channels=32, out_channels=64, kernel_size=kernel_size),
-            UNetBlock(in_channels=64, out_channels=128, kernel_size=kernel_size),
-            UNetBlock(in_channels=128, out_channels=256, kernel_size=kernel_size)
+            UNetBlock(in_channels=in_channels, out_channels=32,
+                      kernel_size=kernel_size),
+            UNetBlock(in_channels=32, out_channels=64,
+                      kernel_size=kernel_size),
+            UNetBlock(in_channels=64, out_channels=128,
+                      kernel_size=kernel_size),
+            UNetBlock(in_channels=128, out_channels=256,
+                      kernel_size=kernel_size)
         ])
 
         # max pooling layer that is used after each encoder block
-        self.max_pool_1d = nn.MaxPool1d(kernel_size=2, stride=2, return_indices=True)
+        self.max_pool_1d = nn.MaxPool1d(
+            kernel_size=2, stride=2, return_indices=True)
 
         # bottleneck layer
-        self.bottleneck_layer = UNetBlock(in_channels=256, out_channels=512, kernel_size=kernel_size)
+        self.bottleneck_layer = UNetBlock(
+            in_channels=256, out_channels=512, kernel_size=kernel_size)
 
         skip_conn_dims = [block.out_channels for block in self.encoder_blocks]
 
         # decoder
         self.decoder_blocks = nn.ModuleList(
             [UNetBlock(in_channels=512 + skip_conn_dims[-1], out_channels=256, kernel_size=kernel_size),
-             UNetBlock(in_channels=256 + skip_conn_dims[-2], out_channels=128, kernel_size=kernel_size),
-             UNetBlock(in_channels=128 + skip_conn_dims[-3], out_channels=64, kernel_size=kernel_size),
+             UNetBlock(
+                 in_channels=256 + skip_conn_dims[-2], out_channels=128, kernel_size=kernel_size),
+             UNetBlock(
+                 in_channels=128 + skip_conn_dims[-3], out_channels=64, kernel_size=kernel_size),
              UNetBlock(in_channels=64 + skip_conn_dims[-4], out_channels=32, kernel_size=kernel_size)]
         )
 
@@ -103,7 +111,8 @@ class GeneralUNet(nn.Module):
         self.max_unpool_1d = nn.MaxUnpool1d(kernel_size=2, stride=2)
 
         # output layer
-        self.out_conv = nn.Conv1d(in_channels=32, out_channels=in_channels, kernel_size=kernel_size, padding=1)
+        self.out_conv = nn.Conv1d(
+            in_channels=32, out_channels=in_channels, kernel_size=kernel_size, padding="same")
 
     def forward(self, x):
         # encoder pass

@@ -10,6 +10,11 @@ from dataset_utils import SigSepDataset
 from data_manipulation_utils import StandardScaler
 from torch.utils.data import DataLoader
 from models import WaveNet
+
+from comm_utils import demodulate_qpsk_signal, demodulate_ofdm_signal, create_resource_grid
+
+from training_utils import SoftDemodLoss, BerLoss
+
 from tqdm import tqdm
 
 import numpy as np
@@ -22,21 +27,19 @@ import argparse
 # CONSTANTS
 intrf_signal_set = ['CommSignal2',
                     'CommSignal3', 'CommSignal5G1', 'EMISignal1']
+sig_len = 40_960
 
 
-def train_loop(model, train_loader, epoch, optimizer, scaler, criterion, device):
+def train_loop(model, train_loader, epoch, optimizer, criterion, device):
     model.train()
     total_loss = 0
     for (soi_mix, soi_target, _, _, _) in tqdm(train_loader, desc=f'Training: [Epoch {epoch + 1}]', unit='batch'):
         optimizer.zero_grad()
         soi_mix, soi_target = soi_mix.to(device), soi_target.to(device)
-
-        with torch.cuda.amp.autocast():
-            soi_est = model(soi_mix)
-            loss = criterion(soi_est, soi_target)
-        scaler.scale(loss).backward()
-        scaler.step(optimizer)
-        scaler.update()
+        soi_est = model(soi_mix)
+        loss = criterion(soi_est, soi_target)
+        loss.backward()
+        optimizer.step()
         total_loss += loss.item()
     return total_loss / len(train_loader)
 
@@ -47,8 +50,8 @@ def validation_loop(model, val_loader, epoch, criterion, device, callback=None):
     with torch.no_grad():
         for (soi_mix, soi_target, msg_bits, intrf_type, sinr) in tqdm(val_loader, desc=f'Validation: [Epoch {epoch + 1}]', unit='batch'):
             soi_mix, soi_target = soi_mix.to(device), soi_target.to(device)
-            with torch.cuda.amp.autocast():
-                soi_est = model(soi_mix)
+
+            soi_est = model(soi_mix)
             loss = criterion(soi_est, soi_target)
             if callback is not None:
                 callback(soi_est.cpu().detach(), soi_target.cpu().detach(), dict(
@@ -63,6 +66,7 @@ def main(**kwargs):
     lr = kwargs["lr"]
     optimizer = kwargs["optimizer"]
     dataset_path = kwargs["dataset_path"]
+    loss = kwargs['loss']
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"\n\nUsing device: {device}")
@@ -97,7 +101,7 @@ def main(**kwargs):
         "input_channels": 2,
         "residual_channels": 256,
         "residual_layers": 30,
-        "dilation_cycle_length": 20
+        "dilation_cycle_length": 10
     }
 
     model = WaveNet(**model_params).to(device)
@@ -113,8 +117,17 @@ def main(**kwargs):
     scheduler = torch.optim.lr_scheduler.StepLR(
         optimizer, step_size=5, gamma=0.01)
 
-    scaler = torch.cuda.amp.GradScaler()
-    criterion = torch.nn.MSELoss()
+    if loss == "mse": 
+        criterion = torch.nn.MSELoss()
+    else:
+        demodulator = demodulate_qpsk_signal if kwargs["soi_type"] == "QPSK" else demodulate_ofdm_signal
+        resource_grid = None if kwargs["soi_type"] == "QPSK" else create_resource_grid(sig_len//80)
+        if kwargs["loss"] == "softdemod":
+            criterion = SoftDemodLoss(demodulator, device, resource_grid)
+        elif kwargs["loss"] == "ber":
+            criterion = BerLoss(demodulator, device, resource_grid)
+        else:
+            raise NotImplemented
 
     run = wandb.init(
         project="Signal Separation Challenge ICASSP 2024", config=kwargs)
@@ -127,7 +140,7 @@ def main(**kwargs):
 
     for epoch in range(epochs):
         avg_tloss = train_loop(
-            model, train_loader, epoch, optimizer, scaler, criterion, device)
+            model, train_loader, epoch, optimizer, criterion, device)
         avg_vloss = validation_loop(
             model, val_loader, epoch, criterion, device)
 
@@ -168,6 +181,8 @@ if __name__ == '__main__':
     parser.add_argument('--lr', type=float, default=1e-3)
     parser.add_argument("--optimizer", type=str, default="adamw",
                         help="Optimizer to use (adam/adamw)")
+    parser.add_argument('--loss', type=str, default='mse',
+                        help="Loss function to use (mse/softdemod/ber)")
     parser.add_argument("--dataset_path", type=str, default=None)
     parser.add_argument("--intrf_dataset_path", type=str,
                         default="rf_datasets/train_test_set_unmixed/dataset/interferenceset_frame")
