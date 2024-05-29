@@ -168,7 +168,7 @@ def evaluation_and_results(model, dataloader, soi_type, device, model_name):
     print("BER figure saved at {}".format(ber_path))
 
 
-def evaluation_and_results2(models, dataloader, soi_type, interference_type, device, model_names):
+def evaluation_and_results2(models, dataloaders, soi_type, interference_type, device, model_names, standardized):
     if interference_type == 'all':
         intrf_signal_set2 = intrf_signal_set
     else:
@@ -176,6 +176,7 @@ def evaluation_and_results2(models, dataloader, soi_type, interference_type, dev
 
     model_names = ["No Mitigation"] + list(model_names)
     models = [None] + list(models)
+    standardized = [False] + list(standardized)
 
     results = {
         key: {
@@ -188,35 +189,37 @@ def evaluation_and_results2(models, dataloader, soi_type, interference_type, dev
         } for key in model_names
     }
 
-    for i, (soi_mix, soi_target, msg_bits, intrf_type, sinr) in enumerate(tqdm(dataloader, desc="Evaluation", unit="batch")):
+    for i, ((soi_mix_r, soi_target_r, msg_bits_r, intrf_type_r, sinr_r), (
+            soi_mix, soi_target, msg_bits, intrf_type, sinr)) in enumerate(tqdm(zip(dataloaders[0], dataloaders[1]), desc="Evaluation", unit="batch")):
         soi_mix = soi_mix.to(device)
-        for model_name, model in zip(model_names, models):
+        soi_mix_r = soi_mix_r.to(device)
+        for model_name, model, std in zip(model_names, models, standardized):
             if model_name == "No Mitigation":
-                soi_est = soi_mix
+                soi_est = soi_mix_r
             else:
                 model.eval()
                 with torch.no_grad():
-                    soi_est = model(soi_mix)
+                    soi_est = model(soi_mix_r) if not std else model(soi_mix)
             if interference_type == "all":
                 for idx, int_type in enumerate(intrf_signal_set2):
                     results[model_name][int_type]["sinr_all"].extend(
-                        sinr[intrf_type == idx].numpy())
+                        sinr_r[intrf_type == idx].numpy() if not std else sinr[intrf_type == idx].numpy())
                     results[model_name][int_type]["soi_target_all"].extend(
-                        soi_target[intrf_type == idx].numpy())
+                        soi_target_r[intrf_type == idx].numpy() if not std else soi_target[intrf_type == idx].numpy())
                     results[model_name][int_type]["soi_est_all"].extend(
                         soi_est[intrf_type == idx].cpu().numpy())
                     results[model_name][int_type]["msg_bits_all"].extend(
-                        msg_bits[intrf_type == idx].numpy())
+                        msg_bits_r[intrf_type == idx].numpy() if not std else msg_bits[intrf_type == idx].numpy())
             else:
                 idx = intrf_signal_set.index(interference_type)
                 results[model_name][interference_type]["sinr_all"].extend(
-                    sinr[intrf_type == idx].numpy())
+                    sinr_r[intrf_type == idx].numpy() if not std else sinr[intrf_type == idx].numpy())
                 results[model_name][interference_type]["soi_target_all"].extend(
-                    soi_target[intrf_type == idx].numpy())
+                    soi_target_r[intrf_type == idx].numpy() if not std else soi_target[intrf_type == idx].numpy())
                 results[model_name][interference_type]["soi_est_all"].extend(
                     soi_est[intrf_type == idx].cpu().numpy())
                 results[model_name][interference_type]["msg_bits_all"].extend(
-                    msg_bits[intrf_type == idx].numpy())
+                    msg_bits_r[intrf_type == idx].numpy() if not std else msg_bits[intrf_type == idx].numpy())
 
     for intrf_type in intrf_signal_set2:
         for model_name in model_names:

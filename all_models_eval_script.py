@@ -11,6 +11,7 @@ from models import GeneralUNet, WaveNet
 from dataset_utils import generate_competition_eval_mixture
 from dataset_utils import SigSepDataset
 from eval_utils import evaluation_and_results2
+from data_manipulation_utils import StandardScaler
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -56,7 +57,8 @@ def main():
 
     model_list = [{
         'model': model_baseline,
-        'model_name': 'Baseline model'
+        'model_name': 'Baseline model',
+        "standardized": False
     }]
 
     if args.num_models > 2:
@@ -72,7 +74,8 @@ def main():
             'model_state_dict', loaded_path.get('state_dict', loaded_path)))
         model_list.append({
             'model': model_unet,
-            'model_name': 'UNet model'
+            'model_name': 'UNet model',
+            "standardized": True
         })
         loaded_path = torch.load(wavenet_model_path)
         model_params = loaded_path.get('model_params', {
@@ -86,7 +89,8 @@ def main():
             'state_dict', loaded_path.get('model_state_dict', loaded_path)))
         model_list.append({
             'model': model_wavenet,
-            'model_name': 'WaveNet model'
+            'model_name': 'WaveNet model',
+            "standardized": False
         })
     elif args.num_models == 1:
         type_of_model = input("Enter the type of model (UNet/WaveNet): ")
@@ -99,7 +103,8 @@ def main():
                 'model_state_dict', loaded_path.get('state_dict', loaded_path)))
             model_list.append({
                 'model': model_unet,
-                'model_name': 'UNet model'
+                'model_name': 'UNet model',
+                "standardized": True
             })
         elif type_of_model == 'WaveNet':
             wavenet_model_path = input("Enter the path to the WaveNet model: ")
@@ -116,7 +121,8 @@ def main():
                 'state_dict', loaded_path.get('model_state_dict', loaded_path)))
             model_list.append({
                 'model': model_wavenet,
-                'model_name': 'WaveNet model'
+                'model_name': 'WaveNet model',
+                "standardized": False
             })
         else:
             raise ValueError("Invalid model type")
@@ -128,21 +134,36 @@ def main():
     print(
         f"\n\nInference will be performed on the Test1 data mixture for the following models:\n{model_names}\nThey will be evaluated for the {args.soi_type} on the following interference signals: {','.join(intrf_signal_set) if args.interference_type == 'all' else args.interference_type}\n\n")
 
+    train_filepath = "rf_datasets/train_set_mixed/datasets/QPSK_20240407_211116" if args.soi_type == "QPSK" else "rf_datasets/train_set_mixed/datasets/QPSK_OFDM_20240407_211404"
+    train_filepaths_list = [os.path.join(train_filepath, batch_file)
+                            for batch_file in os.listdir(train_filepath)]
+    train_size = int(0.8 * len(train_filepaths_list))
+    scaler = StandardScaler(train_filepaths_list[:train_size])
+    if args.soi_type == 'QPSK':
+        scaler.mu = -0.00023688253749715093 + 1j * 0.000709482444289711
+        scaler.sigma = 7.347274835527751
+    elif args.soi_type == 'QPSK_OFDM':
+        scaler.mu = -0.00040491584097022406 + 1j * 0.000572398170269466
+        scaler.sigma = 7.160499862913227
+
     mixed_dataset_path, _, _ = generate_competition_eval_mixture(
         args.soi_type, args.interference_dir_path)
 
     # load the dataset
     filepaths_list = [os.path.join(mixed_dataset_path, batch_file)
                       for batch_file in os.listdir(mixed_dataset_path)]
+    dataset_standardized = SigSepDataset(filepaths_list, scaler, dtype="real")
     dataset = SigSepDataset(filepaths_list, dtype="real")
+    dataloader_standardized = torch.utils.data.DataLoader(
+        dataset_standardized, batch_size=args.batch_size, shuffle=False)
     dataloader = torch.utils.data.DataLoader(
         dataset, batch_size=args.batch_size, shuffle=False)
 
     # Perform inference
-    models, model_names = zip(*[(model['model'], model['model_name'])
-                                for model in model_list])
-    evaluation_and_results2(models, dataloader,
-                            args.soi_type, args.interference_type, device, model_names)
+    models, model_names, standardized = zip(*[(model['model'], model['model_name'], model['standardized'])
+                                              for model in model_list])
+    evaluation_and_results2(models, (dataloader, dataloader_standardized),
+                            args.soi_type, args.interference_type, device, model_names, standardized)
 
 
 if __name__ == "__main__":
